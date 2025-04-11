@@ -1,11 +1,11 @@
-import { RegisterForm } from "../register-form"
+import { LoginForm } from "../login-form"
 
-function RegisterPage() {
+function LoginPage() {
   return (
     <div className="auth-container">
-      <RegisterForm />
+      <LoginForm />
     </div>
   )
 }
 
-export default RegisterPage
+export default LoginPage
