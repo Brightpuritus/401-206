@@ -1,11 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
-import { ScrollArea } from "./ui/scroll-area"
 import { Send } from "lucide-react"
+import "../styles/components/messages.css"
 
 // Mock data for conversations
 const conversationsData = [
@@ -298,81 +295,79 @@ export function MessagesView() {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="messages">
       {/* Conversations list */}
-      <div className="w-1/3 border-r dark:border-gray-800">
-        <div className="p-4 border-b dark:border-gray-800">
-          <h2 className="font-bold text-lg">Messages</h2>
+      <div className="conversations-list">
+        <div className="conversations-header">
+          <h2 className="conversations-title">Messages</h2>
         </div>
-        <ScrollArea className="h-[calc(100vh-64px)]">
+        <div className="conversations-scroll">
           {conversations.map((conversation) => (
             <div
               key={conversation.id}
-              className={`p-4 flex items-center gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 ${
-                activeConversation.id === conversation.id ? "bg-gray-100 dark:bg-gray-800" : ""
-              }`}
+              className={`conversation-item ${activeConversation.id === conversation.id ? "active" : ""}`}
               onClick={() => handleSelectConversation(conversation)}
             >
-              <Avatar>
-                <AvatarImage src={conversation.user.avatar} alt={conversation.user.name} />
-                <AvatarFallback>{conversation.user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-center">
-                  <p className="font-medium truncate">{conversation.user.name}</p>
-                  <p className="text-xs text-muted-foreground">{conversation.timestamp}</p>
+              <div className="avatar">
+                <img
+                  src={conversation.user.avatar || "/placeholder.svg"}
+                  alt={conversation.user.name}
+                  className="avatar-image"
+                />
+              </div>
+              <div className="conversation-info">
+                <div className="conversation-header">
+                  <p className="conversation-name">{conversation.user.name}</p>
+                  <p className="conversation-time">{conversation.timestamp}</p>
                 </div>
-                <p className={`text-sm truncate ${conversation.unread ? "font-medium" : "text-muted-foreground"}`}>
+                <p className={`conversation-last-message ${conversation.unread ? "unread" : ""}`}>
                   {conversation.lastMessage}
                 </p>
               </div>
-              {conversation.unread && <div className="w-2 h-2 rounded-full bg-yamaha-red"></div>}
+              {conversation.unread && <div className="conversation-unread-indicator"></div>}
             </div>
           ))}
-        </ScrollArea>
+        </div>
       </div>
 
       {/* Active conversation */}
-      <div className="flex-1 flex flex-col">
+      <div className="chat">
         {/* Conversation header */}
-        <div className="p-4 border-b dark:border-gray-800 flex items-center gap-3">
-          <Avatar>
-            <AvatarImage src={activeConversation.user.avatar} alt={activeConversation.user.name} />
-            <AvatarFallback>{activeConversation.user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="font-medium">{activeConversation.user.name}</p>
-            <p className="text-xs text-muted-foreground">@{activeConversation.user.username}</p>
+        <div className="chat-header">
+          <div className="avatar">
+            <img
+              src={activeConversation.user.avatar || "/placeholder.svg"}
+              alt={activeConversation.user.name}
+              className="avatar-image"
+            />
+          </div>
+          <div className="chat-user-info">
+            <p className="chat-user-name">{activeConversation.user.name}</p>
+            <p className="chat-user-username">@{activeConversation.user.username}</p>
           </div>
         </div>
 
         {/* Messages */}
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
+        <div className="chat-messages">
+          <div className="messages-list">
             {activeMessages.map((message) => (
-              <div key={message.id} className={`flex ${message.isCurrentUser ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`max-w-[70%] p-3 rounded-lg ${
-                    message.isCurrentUser
-                      ? "bg-yamaha-red text-white rounded-br-none"
-                      : "bg-gray-100 dark:bg-gray-800 rounded-bl-none"
-                  }`}
-                >
-                  <p className="text-sm">{message.text}</p>
-                  <p className={`text-xs mt-1 ${message.isCurrentUser ? "text-white/70" : "text-muted-foreground"}`}>
-                    {message.timestamp}
-                  </p>
+              <div key={message.id} className={`message ${message.isCurrentUser ? "outgoing" : "incoming"}`}>
+                <div className="message-bubble">
+                  <p className="message-text">{message.text}</p>
+                  <p className="message-time">{message.timestamp}</p>
                 </div>
               </div>
             ))}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Message input */}
-        <div className="p-4 border-t dark:border-gray-800">
-          <div className="flex gap-2">
-            <Input
+        <div className="chat-input">
+          <div className="chat-input-form">
+            <input
+              type="text"
               placeholder="Type a message..."
+              className="form-input"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyDown={(e) => {
@@ -381,13 +376,9 @@ export function MessagesView() {
                 }
               }}
             />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!newMessage.trim()}
-              className="bg-yamaha-red hover:bg-yamaha-darkRed"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
+            <button className="btn btn-primary" onClick={handleSendMessage} disabled={!newMessage.trim()}>
+              <Send size={16} />
+            </button>
           </div>
         </div>
       </div>

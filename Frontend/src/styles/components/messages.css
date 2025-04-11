@@ -1,0 +1,176 @@
+.messages {
+  display: flex;
+  height: 100vh;
+}
+
+.conversations-list {
+  width: 33.333333%;
+  border-right: 1px solid var(--border);
+}
+
+.conversations-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.conversations-title {
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.conversations-scroll {
+  height: calc(100vh - 4rem);
+  overflow-y: auto;
+}
+
+.conversation-item {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.conversation-item:hover {
+  background-color: var(--accent);
+}
+
+.conversation-item.active {
+  background-color: var(--muted);
+}
+
+.conversation-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.conversation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.conversation-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conversation-time {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.conversation-last-message {
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--muted-foreground);
+}
+
+.conversation-last-message.unread {
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.conversation-unread-indicator {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--primary);
+}
+
+.chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.chat-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-user-name {
+  font-weight: 500;
+}
+
+.chat-user-username {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.message {
+  display: flex;
+}
+
+.message.outgoing {
+  justify-content: flex-end;
+}
+
+.message-bubble {
+  max-width: 70%;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+}
+
+.message.incoming .message-bubble {
+  background-color: var(--muted);
+  border-bottom-left-radius: 0;
+}
+
+.message.outgoing .message-bubble {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border-bottom-right-radius: 0;
+}
+
+.message-text {
+  font-size: 0.875rem;
+}
+
+.message-time {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.message.incoming .message-time {
+  color: var(--muted-foreground);
+}
+
+.message.outgoing .message-time {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.chat-input {
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.chat-input-form {
+  display: flex;
+  gap: 0.5rem;
+}

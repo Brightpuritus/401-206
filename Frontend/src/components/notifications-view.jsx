@@ -2,9 +2,7 @@
 
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { Button } from "./ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
+import "../styles/components/notifications.css"
 
 // Mock data for notifications
 const initialNotifications = [
@@ -78,6 +76,7 @@ const initialNotifications = [
 export function NotificationsView() {
   const [notifications, setNotifications] = useState(initialNotifications)
   const [followStatus, setFollowStatus] = useState({})
+  const [activeTab, setActiveTab] = useState("all")
 
   const handleMarkAllAsRead = () => {
     setNotifications(
@@ -95,171 +94,94 @@ export function NotificationsView() {
     }))
   }
 
+  const displayedNotifications = activeTab === "all" ? notifications : notifications.filter((n) => !n.isRead)
+
   return (
-    <div className="max-w-2xl mx-auto py-6 px-4">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Notifications</h1>
-        <Button variant="ghost" size="sm" onClick={handleMarkAllAsRead}>
+    <div className="notifications">
+      <div className="notifications-header">
+        <h1 className="notifications-title">Notifications</h1>
+        <button className="btn btn-ghost" onClick={handleMarkAllAsRead}>
           Mark all as read
-        </Button>
+        </button>
       </div>
 
-      <Tabs defaultValue="all">
-        <TabsList className="w-full mb-6">
-          <TabsTrigger value="all" className="flex-1">
+      <div className="tabs">
+        <div className="tabs-list">
+          <button className={`tabs-trigger ${activeTab === "all" ? "active" : ""}`} onClick={() => setActiveTab("all")}>
             All
-          </TabsTrigger>
-          <TabsTrigger value="unread" className="flex-1">
+          </button>
+          <button
+            className={`tabs-trigger ${activeTab === "unread" ? "active" : ""}`}
+            onClick={() => setActiveTab("unread")}
+          >
             Unread
-          </TabsTrigger>
-        </TabsList>
+          </button>
+        </div>
 
-        <TabsContent value="all">
-          <div className="space-y-4">
-            {notifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={`p-4 rounded-lg ${notification.isRead ? "bg-white dark:bg-gray-900" : "bg-gray-50 dark:bg-gray-800"} ${notification.isAd ? "border border-yamaha-red" : ""}`}
-              >
-                <div className="flex gap-3">
-                  <Avatar>
-                    <AvatarImage src={notification.user.avatar} alt={notification.user.name} />
-                    <AvatarFallback>{notification.user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-sm">
-                          <Link to={`/profile/${notification.user.username}`} className="font-medium">
-                            {notification.user.name}
-                          </Link>{" "}
-                          {notification.content}
-                        </p>
-                        <p className="text-xs text-muted-foreground">{notification.timestamp}</p>
-                      </div>
-                      {notification.postImage && (
-                        <div className="ml-2 flex-shrink-0">
-                          <img
-                            src={notification.postImage || "/placeholder.svg"}
-                            alt="Post"
-                            width={60}
-                            height={60}
-                            className="rounded-md"
-                          />
-                        </div>
-                      )}
-                      {notification.type === "follow" && (
-                        <Button
-                          variant={followStatus[notification.user.username] ? "outline" : "default"}
-                          size="sm"
-                          onClick={() => handleFollow(notification.user.username)}
-                          className={
-                            followStatus[notification.user.username] ? "" : "bg-yamaha-red hover:bg-yamaha-darkRed"
-                          }
-                        >
-                          {followStatus[notification.user.username] ? "Following" : "Follow"}
-                        </Button>
-                      )}
+        <div className="tabs-content">
+          <div className="notifications-list">
+            {displayedNotifications.length > 0 ? (
+              displayedNotifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  className={`notification-item ${notification.isRead ? "" : "unread"} ${notification.isAd ? "ad" : ""}`}
+                >
+                  <div className="notification-content">
+                    <div className="avatar">
+                      <img
+                        src={notification.user.avatar || "/placeholder.svg"}
+                        alt={notification.user.name}
+                        className="avatar-image"
+                      />
                     </div>
-                    {notification.adImage && (
-                      <div className="mt-3">
-                        <img
-                          src={notification.adImage || "/placeholder.svg"}
-                          alt="Advertisement"
-                          width={400}
-                          height={200}
-                          className="rounded-md w-full h-auto"
-                        />
-                        <div className="mt-2 flex justify-end">
-                          <Button size="sm" className="bg-yamaha-red hover:bg-yamaha-darkRed">
-                            Learn More
-                          </Button>
+                    <div className="notification-body">
+                      <div className="notification-header">
+                        <div>
+                          <p className="notification-text">
+                            <Link to={`/profile/${notification.user.username}`} className="notification-username">
+                              {notification.user.name}
+                            </Link>{" "}
+                            {notification.content}
+                          </p>
+                          <p className="notification-time">{notification.timestamp}</p>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="unread">
-          <div className="space-y-4">
-            {notifications.filter((n) => !n.isRead).length > 0 ? (
-              notifications
-                .filter((n) => !n.isRead)
-                .map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`p-4 rounded-lg bg-gray-50 dark:bg-gray-800 ${notification.isAd ? "border border-yamaha-red" : ""}`}
-                  >
-                    <div className="flex gap-3">
-                      <Avatar>
-                        <AvatarImage src={notification.user.avatar} alt={notification.user.name} />
-                        <AvatarFallback>{notification.user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <p className="text-sm">
-                              <Link to={`/profile/${notification.user.username}`} className="font-medium">
-                                {notification.user.name}
-                              </Link>{" "}
-                              {notification.content}
-                            </p>
-                            <p className="text-xs text-muted-foreground">{notification.timestamp}</p>
-                          </div>
-                          {notification.postImage && (
-                            <div className="ml-2 flex-shrink-0">
-                              <img
-                                src={notification.postImage || "/placeholder.svg"}
-                                alt="Post"
-                                width={60}
-                                height={60}
-                                className="rounded-md"
-                              />
-                            </div>
-                          )}
-                          {notification.type === "follow" && (
-                            <Button
-                              variant={followStatus[notification.user.username] ? "outline" : "default"}
-                              size="sm"
-                              onClick={() => handleFollow(notification.user.username)}
-                              className={
-                                followStatus[notification.user.username] ? "" : "bg-yamaha-red hover:bg-yamaha-darkRed"
-                              }
-                            >
-                              {followStatus[notification.user.username] ? "Following" : "Follow"}
-                            </Button>
-                          )}
-                        </div>
-                        {notification.adImage && (
-                          <div className="mt-3">
-                            <img
-                              src={notification.adImage || "/placeholder.svg"}
-                              alt="Advertisement"
-                              width={400}
-                              height={200}
-                              className="rounded-md w-full h-auto"
-                            />
-                            <div className="mt-2 flex justify-end">
-                              <Button size="sm" className="bg-yamaha-red hover:bg-yamaha-darkRed">
-                                Learn More
-                              </Button>
-                            </div>
+                        {notification.postImage && (
+                          <div className="notification-image">
+                            <img src={notification.postImage || "/placeholder.svg"} alt="Post" width={60} height={60} />
                           </div>
                         )}
+                        {notification.type === "follow" && (
+                          <button
+                            className={`btn ${followStatus[notification.user.username] ? "btn-outline" : "btn-primary"}`}
+                            onClick={() => handleFollow(notification.user.username)}
+                          >
+                            {followStatus[notification.user.username] ? "Following" : "Follow"}
+                          </button>
+                        )}
                       </div>
+                      {notification.adImage && (
+                        <div className="notification-ad-image">
+                          <img
+                            src={notification.adImage || "/placeholder.svg"}
+                            alt="Advertisement"
+                            width={400}
+                            height={200}
+                          />
+                          <div className="notification-ad-actions">
+                            <button className="btn btn-primary">Learn More</button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                ))
+                </div>
+              ))
             ) : (
-              <p className="text-center text-muted-foreground py-8">No unread notifications</p>
+              <p className="empty-notifications">No {activeTab === "unread" ? "unread " : ""}notifications</p>
             )}
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
     </div>
   )
 }

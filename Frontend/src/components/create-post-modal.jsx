@@ -3,6 +3,7 @@
 import { useState, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { ImagePlus, X } from "lucide-react"
+import "../styles/components/create-post-modal.css"
 
 export function CreatePostModal({ isOpen, onClose }) {
   const navigate = useNavigate()
@@ -10,6 +11,8 @@ export function CreatePostModal({ isOpen, onClose }) {
   const [selectedImage, setSelectedImage] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const fileInputRef = useRef(null)
+
+  if (!isOpen) return null
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0]
@@ -37,17 +40,10 @@ export function CreatePostModal({ isOpen, onClose }) {
       },
       image: selectedImage,
       caption: caption,
-      likes: 0,
-      liked: false,
-      saved: false,
-      comments: [],
       timestamp: "Just now",
     }
 
-    // Add the new post to the feed
-    if (typeof window !== "undefined" && window.addNewPost) {
-      window.addNewPost(newPost)
-    }
+    console.log("New post created:", newPost)
 
     // Reset form and close modal
     setCaption("")
@@ -59,53 +55,51 @@ export function CreatePostModal({ isOpen, onClose }) {
     navigate("/home")
   }
 
-  if (!isOpen) return null
+  const handleClose = () => {
+    setCaption("")
+    setSelectedImage(null)
+    onClose()
+  }
 
   return (
-    <div className="dialog-overlay">
-      <div className="dialog-content" style={{ maxWidth: "28rem" }}>
-        <div className="dialog-header">
-          <h2 className="dialog-title">Create new post</h2>
-          <p style={{ fontSize: "var(--font-sm)", color: "var(--color-muted)" }}>
-            Share your Yamaha experience with the community
-          </p>
-          <button className="dialog-close" onClick={onClose}>
-            <X size={18} />
-          </button>
+    <div className="modal-overlay" onClick={handleClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">Create new post</h2>
+          <p className="modal-description">Share your Yamaha experience with the community</p>
         </div>
-        <div className="dialog-body">
-          {!selectedImage ? (
-            <div className="create-post-dropzone" onClick={() => fileInputRef.current?.click()}>
-              <ImagePlus size={48} style={{ color: "var(--color-muted)", marginBottom: "1rem" }} />
-              <p style={{ fontSize: "var(--font-sm)", color: "var(--color-muted)" }}>Click to upload an image</p>
-              <input
-                type="file"
-                ref={fileInputRef}
-                style={{ display: "none" }}
-                accept="image/*"
-                onChange={handleImageChange}
-              />
-            </div>
-          ) : (
-            <div className="create-post-preview">
-              <button className="create-post-remove" onClick={() => setSelectedImage(null)}>
-                <X size={16} />
-              </button>
-              <img src={selectedImage || "/placeholder.svg"} alt="Selected image" />
-            </div>
-          )}
 
-          <textarea
-            placeholder="Write a caption..."
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            className="textarea"
-            style={{ marginTop: "1rem", resize: "none" }}
-            rows={3}
-          />
-        </div>
-        <div className="dialog-footer">
-          <button className="btn btn-outline" onClick={onClose} disabled={isSubmitting}>
+        {!selectedImage ? (
+          <div className="image-upload-area" onClick={() => fileInputRef.current?.click()}>
+            <ImagePlus className="upload-icon" />
+            <p className="upload-text">Click to upload an image</p>
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden-input"
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+          </div>
+        ) : (
+          <div className="selected-image-container">
+            <button className="remove-image-button" onClick={() => setSelectedImage(null)}>
+              <X size={16} />
+            </button>
+            <img src={selectedImage || "/placeholder.svg"} alt="Selected image" className="selected-image" />
+          </div>
+        )}
+
+        <textarea
+          placeholder="Write a caption..."
+          value={caption}
+          onChange={(e) => setCaption(e.target.value)}
+          className="caption-textarea"
+          rows={3}
+        />
+
+        <div className="modal-footer">
+          <button className="btn btn-outline" onClick={handleClose} disabled={isSubmitting}>
             Cancel
           </button>
           <button

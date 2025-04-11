@@ -2,14 +2,8 @@
 
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { Button } from "./ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
-import { Input } from "./ui/input"
-import { Label } from "./ui/label"
-import { Textarea } from "./ui/textarea"
-import { CalendarDays, Grid, LinkIcon, MapPin } from "lucide-react"
+import { CalendarDays, Grid, MapPin } from "lucide-react"
+import "../styles/components/profile.css"
 
 // Mock user data
 const users = {
@@ -72,162 +66,177 @@ export function ProfileView({ username }) {
   }
 
   return (
-    <div className="w-full">
+    <div className="profile">
       {/* Header Image */}
-      <div className="relative h-48 md:h-64 w-full">
-        <img src={user.headerImage || "/placeholder.svg"} alt="Header" className="w-full h-full object-cover" />
+      <div className="profile-header-image">
+        <img src={user.headerImage || "/placeholder.svg"} alt="Header" />
       </div>
 
       {/* Profile Info */}
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="flex flex-col relative">
+      <div className="profile-content">
+        <div className="profile-info">
           {/* Avatar */}
-          <div className="absolute -top-16 left-4 border-4 border-white dark:border-gray-950 rounded-full">
-            <Avatar className="w-32 h-32">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-            </Avatar>
+          <div className="profile-avatar">
+            <div className="avatar avatar-lg">
+              <img src={user.avatar || "/placeholder.svg"} alt={user.name} className="avatar-image" />
+            </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end mt-4 mb-8">
+          <div className="profile-actions">
             {user.isCurrentUser ? (
-              <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline">Edit Profile</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Edit Profile</DialogTitle>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="name">Name</Label>
-                      <Input
-                        id="name"
-                        value={profileData.name}
-                        onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="username">Username</Label>
-                      <Input
-                        id="username"
-                        value={profileData.username}
-                        onChange={(e) => setProfileData({ ...profileData, username: e.target.value })}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="bio">Bio</Label>
-                      <Textarea
-                        id="bio"
-                        value={profileData.bio}
-                        onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
-                        rows={3}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="location">Location</Label>
-                      <Input
-                        id="location"
-                        value={profileData.location}
-                        onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="website">Website</Label>
-                      <Input
-                        id="website"
-                        value={profileData.website}
-                        onChange={(e) => setProfileData({ ...profileData, website: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex justify-end">
-                    <Button onClick={handleProfileUpdate} className="bg-yamaha-red hover:bg-yamaha-darkRed">
-                      Save Changes
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <button className="btn btn-outline" onClick={() => setIsEditProfileOpen(true)}>
+                Edit Profile
+              </button>
             ) : (
-              <Button
-                onClick={handleFollow}
-                variant={isFollowing ? "outline" : "default"}
-                className={isFollowing ? "" : "bg-yamaha-red hover:bg-yamaha-darkRed"}
-              >
+              <button className={`btn ${isFollowing ? "btn-outline" : "btn-primary"}`} onClick={handleFollow}>
                 {isFollowing ? "Following" : "Follow"}
-              </Button>
+              </button>
             )}
           </div>
 
           {/* Profile Details */}
-          <div className="mt-8">
-            <h1 className="text-2xl font-bold">{user.name}</h1>
-            <p className="text-muted-foreground">@{user.username}</p>
+          <div className="profile-details">
+            <h1 className="profile-name">{user.name}</h1>
+            <p className="profile-username">@{user.username}</p>
 
-            <p className="my-4">{user.bio}</p>
+            <p className="profile-bio">{user.bio}</p>
 
-            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
+            <div className="profile-meta">
               {user.location && (
-                <div className="flex items-center">
-                  <MapPin className="h-4 w-4 mr-1" />
+                <div className="profile-meta-item">
+                  <MapPin size={16} className="profile-meta-icon" />
                   {user.location}
                 </div>
               )}
               {user.website && (
-                <div className="flex items-center">
-                  <LinkIcon className="h-4 w-4 mr-1" />
+                <div className="profile-meta-item">
                   <a
                     href={`https://${user.website}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary"
+                    className="profile-website"
                   >
                     {user.website}
                   </a>
                 </div>
               )}
-              <div className="flex items-center">
-                <CalendarDays className="h-4 w-4 mr-1" />
+              <div className="profile-meta-item">
+                <CalendarDays size={16} className="profile-meta-icon" />
                 Joined {user.joinDate}
               </div>
             </div>
 
-            <div className="flex gap-4 text-sm mb-6">
-              <Link to="#" className="hover:underline">
-                <span className="font-bold">{user.following.toLocaleString()}</span> Following
+            <div className="profile-stats">
+              <Link to="#" className="profile-stat-link">
+                <span className="profile-stat-count">{user.following.toLocaleString()}</span> Following
               </Link>
-              <Link to="#" className="hover:underline">
-                <span className="font-bold">{followerCount.toLocaleString()}</span> Followers
+              <Link to="#" className="profile-stat-link">
+                <span className="profile-stat-count">{followerCount.toLocaleString()}</span> Followers
               </Link>
             </div>
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="posts" className="mt-4">
-            <TabsList className="w-full">
-              <TabsTrigger value="posts" className="flex-1">
-                <Grid className="h-4 w-4 mr-2" />
-                Posts
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="posts" className="mt-6">
-              <div className="grid grid-cols-3 gap-1">
-                {user.images.map((image, index) => (
-                  <div key={index} className="aspect-square relative">
-                    <img
-                      src={image || "/placeholder.svg"}
-                      alt={`Post ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
+          <div className="profile-tabs">
+            <div className="tabs">
+              <div className="tabs-list">
+                <button className="tabs-trigger active">
+                  <Grid size={16} style={{ marginRight: "0.5rem" }} />
+                  Posts
+                </button>
               </div>
-            </TabsContent>
-          </Tabs>
+              <div className="tabs-content">
+                <div className="profile-posts-grid">
+                  {user.images.map((image, index) => (
+                    <div key={index} className="profile-post">
+                      <img src={image || "/placeholder.svg"} alt={`Post ${index + 1}`} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Edit Profile Modal */}
+      {isEditProfileOpen && (
+        <div className="modal-overlay" onClick={() => setIsEditProfileOpen(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">Edit Profile</h2>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label htmlFor="name" className="form-label">
+                  Name
+                </label>
+                <input
+                  id="name"
+                  className="form-input"
+                  value={profileData.name}
+                  onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="username" className="form-label">
+                  Username
+                </label>
+                <input
+                  id="username"
+                  className="form-input"
+                  value={profileData.username}
+                  onChange={(e) => setProfileData({ ...profileData, username: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="bio" className="form-label">
+                  Bio
+                </label>
+                <textarea
+                  id="bio"
+                  className="form-textarea"
+                  value={profileData.bio}
+                  onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                  rows={3}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="location" className="form-label">
+                  Location
+                </label>
+                <input
+                  id="location"
+                  className="form-input"
+                  value={profileData.location}
+                  onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="website" className="form-label">
+                  Website
+                </label>
+                <input
+                  id="website"
+                  className="form-input"
+                  value={profileData.website}
+                  onChange={(e) => setProfileData({ ...profileData, website: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-outline" onClick={() => setIsEditProfileOpen(false)}>
+                Cancel
+              </button>
+
+              <button onClick={handleProfileUpdate} className="btn btn-primary">
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

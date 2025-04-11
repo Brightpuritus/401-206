@@ -2,12 +2,9 @@
 
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Button } from "./ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
-import { Label } from "./ui/label"
-import { Switch } from "./ui/switch"
 import { useTheme } from "./theme-provider"
 import { LogOut, Moon, Sun } from "lucide-react"
+import "../styles/components/settings-view.css"
 
 export function SettingsView() {
   const navigate = useNavigate()
@@ -24,80 +21,106 @@ export function SettingsView() {
     navigate("/")
   }
 
+  const handleThemeChange = (e) => {
+    const newTheme = e.target.checked ? "dark" : "light"
+    setTheme(newTheme)
+    console.log("Theme changed to:", newTheme)
+  }
+
+  const handleNotificationChange = (type) => {
+    setNotifications((prev) => ({
+      ...prev,
+      [type]: !prev[type],
+    }))
+  }
+
   return (
-    <div className="max-w-2xl mx-auto py-6 px-4">
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
+    <div className="settings">
+      <h1 className="settings-title">Settings</h1>
 
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Appearance</CardTitle>
-            <CardDescription>Customize how Yamaha Social looks on your device</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                {theme === "dark" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-                <Label htmlFor="theme-mode">Dark Mode</Label>
+      <div className="settings-sections">
+        <div className="settings-card">
+          <div className="settings-card-header">
+            <h2 className="settings-card-title">Appearance</h2>
+            <p className="settings-card-description">Customize how Yamaha Social looks on your device</p>
+          </div>
+          <div className="settings-card-content">
+            <div className="settings-item">
+              <div className="settings-item-label">
+                {theme === "dark" ? <Moon size={20} /> : <Sun size={20} />}
+                <span>Dark Mode</span>
               </div>
-              <Switch
-                id="theme-mode"
-                checked={theme === "dark"}
-                onCheckedChange={(checked) => {
-                  const newTheme = checked ? "dark" : "light"
-                  setTheme(newTheme)
-                  console.log("Theme changed to:", newTheme)
-                }}
-              />
+              <label className="switch">
+                <input type="checkbox" checked={theme === "dark"} onChange={handleThemeChange} />
+                <span className="switch-slider"></span>
+              </label>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Notifications</CardTitle>
-            <CardDescription>Configure how you want to be notified</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="email-notifications">Email Notifications</Label>
-              <Switch
-                id="email-notifications"
-                checked={notifications.email}
-                onCheckedChange={(checked) => setNotifications({ ...notifications, email: checked })}
-              />
+        <div className="settings-card">
+          <div className="settings-card-header">
+            <h2 className="settings-card-title">Notifications</h2>
+            <p className="settings-card-description">Configure how you want to be notified</p>
+          </div>
+          <div className="settings-card-content">
+            <div className="settings-item">
+              <label htmlFor="email-notifications" className="settings-item-label">
+                Email Notifications
+              </label>
+              <label className="switch">
+                <input
+                  id="email-notifications"
+                  type="checkbox"
+                  checked={notifications.email}
+                  onChange={() => handleNotificationChange("email")}
+                />
+                <span className="switch-slider"></span>
+              </label>
             </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="push-notifications">Push Notifications</Label>
-              <Switch
-                id="push-notifications"
-                checked={notifications.push}
-                onCheckedChange={(checked) => setNotifications({ ...notifications, push: checked })}
-              />
+            <div className="settings-item">
+              <label htmlFor="push-notifications" className="settings-item-label">
+                Push Notifications
+              </label>
+              <label className="switch">
+                <input
+                  id="push-notifications"
+                  type="checkbox"
+                  checked={notifications.push}
+                  onChange={() => handleNotificationChange("push")}
+                />
+                <span className="switch-slider"></span>
+              </label>
             </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="marketing-emails">Marketing Emails</Label>
-              <Switch
-                id="marketing-emails"
-                checked={notifications.marketing}
-                onCheckedChange={(checked) => setNotifications({ ...notifications, marketing: checked })}
-              />
+            <div className="settings-item">
+              <label htmlFor="marketing-emails" className="settings-item-label">
+                Marketing Emails
+              </label>
+              <label className="switch">
+                <input
+                  id="marketing-emails"
+                  type="checkbox"
+                  checked={notifications.marketing}
+                  onChange={() => handleNotificationChange("marketing")}
+                />
+                <span className="switch-slider"></span>
+              </label>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Account</CardTitle>
-            <CardDescription>Manage your account settings</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="destructive" onClick={handleLogout} className="w-full">
-              <LogOut className="mr-2 h-4 w-4" />
+        <div className="settings-card">
+          <div className="settings-card-header">
+            <h2 className="settings-card-title">Account</h2>
+            <p className="settings-card-description">Manage your account settings</p>
+          </div>
+          <div className="settings-card-content">
+            <button className="btn btn-destructive btn-full" onClick={handleLogout}>
+              <LogOut size={16} className="btn-icon" />
               Log out
-            </Button>
-          </CardContent>
-        </Card>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { YamahaLogo } from "./yamaha-logo"
+import "../styles/components/auth-forms.css"
 
 export function RegisterForm() {
   const navigate = useNavigate()
@@ -30,85 +31,85 @@ export function RegisterForm() {
   }
 
   return (
-    <div className="card shadow-lg" style={{ maxWidth: "28rem", width: "100%", border: "none" }}>
-      <div className="card-header" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <YamahaLogo className="mb-4" style={{ height: "3rem" }} />
-        <h3 className="card-title">Create an account</h3>
-        <p className="card-description">Enter your information to create an account</p>
+    <div className="auth-card">
+      <div className="auth-header">
+        <YamahaLogo className="auth-logo" />
+        <h2 className="auth-title">Create an account</h2>
+        <p className="auth-description">Enter your information to create an account</p>
       </div>
-      <div className="card-content">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div className="auth-content">
+        <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label htmlFor="name" className="label">
+            <label htmlFor="name" className="form-label">
               Full Name
             </label>
             <input
               id="name"
               name="name"
+              className="form-input"
               placeholder="John Doe"
               required
               value={formData.name}
               onChange={handleChange}
-              className="input"
             />
           </div>
           <div className="form-group">
-            <label htmlFor="username" className="label">
+            <label htmlFor="username" className="form-label">
               Username
             </label>
             <input
               id="username"
               name="username"
+              className="form-input"
               placeholder="johndoe"
               required
               value={formData.username}
               onChange={handleChange}
-              className="input"
             />
           </div>
           <div className="form-group">
-            <label htmlFor="email" className="label">
+            <label htmlFor="email" className="form-label">
               Email
             </label>
             <input
               id="email"
               name="email"
               type="email"
+              className="form-input"
               placeholder="name@example.com"
               required
               value={formData.email}
               onChange={handleChange}
-              className="input"
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password" className="label">
+            <label htmlFor="password" className="form-label">
               Password
             </label>
             <input
               id="password"
               name="password"
               type="password"
+              className="form-input"
               placeholder="••••••••"
               required
               value={formData.password}
               onChange={handleChange}
-              className="input"
             />
           </div>
           <div className="form-group">
-            <label htmlFor="confirmPassword" className="label">
+            <label htmlFor="confirmPassword" className="form-label">
               Confirm Password
             </label>
             <input
               id="confirmPassword"
               name="confirmPassword"
               type="password"
+              className="form-input"
               placeholder="••••••••"
               required
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="input"
             />
           </div>
           <button type="submit" className="btn btn-primary btn-full">
@@ -116,10 +117,10 @@ export function RegisterForm() {
           </button>
         </form>
       </div>
-      <div className="card-footer" style={{ display: "flex", flexDirection: "column", textAlign: "center" }}>
-        <div className="text-sm">
+      <div className="auth-footer">
+        <div className="auth-redirect">
           Already have an account?{" "}
-          <Link to="/" style={{ color: "var(--color-primary)" }}>
+          <Link to="/" className="auth-link">
             Sign in
           </Link>
         </div>
