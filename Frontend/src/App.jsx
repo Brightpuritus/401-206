@@ -16,6 +16,7 @@ function App() {
     <Routes>
       <Route path="/" element={isAuthenticated ? <Navigate to="/home" /> : <LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/login" element={<LoginPage />} />
       <Route path="/home" element={<HomePage />} />
       <Route path="/profile/:username" element={<ProfilePage />} />
       <Route path="/messages" element={<MessagesPage />} />
