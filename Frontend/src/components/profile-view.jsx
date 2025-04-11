@@ -9,15 +9,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { Textarea } from "./ui/textarea"
-import { CalendarDays, Grid, LinkIcon, MapPin } from "lucide-react"
+import { CalendarDays, Grid, LinkIcon, MapPin, PlusIcon, Film, Bookmark, UserCircle, Play, Heart, MessageCircle, Send, MoreHorizontal } from "lucide-react"
+import "../styles/profile.css";
 
 // Mock user data
 const users = {
   me: {
     username: "yamaha_rider",
     name: "Alex Johnson",
-    avatar: "/placeholder.svg?height=150&width=150",
-    bio: "Yamaha enthusiast. Rider. Music lover.",
+    avatar: "/images/avatars/yamaha-rider.jpg",
+    bio: "Yamaha enthusiast. Rider. Music lover. 🏍️\nOfficial Yamaha Ambassador 🔰",
     location: "Tokyo, Japan",
     website: "yamaha-rider.com",
     joinDate: "January 2020",
@@ -26,8 +27,34 @@ const users = {
     following: 350,
     isCurrentUser: true,
     isFollowing: false,
-    images: Array(9).fill("/placeholder.svg?height=300&width=300"),
-    headerImage: "/placeholder.svg?height=400&width=1200",
+    images: [
+      { 
+        id: 1,
+        url: "/images/posts/r1-1.jpg",
+        likes: 856,
+        comments: 43,
+        caption: "New R1M looking perfect 🔥",
+        isVideo: false 
+      },
+      // ...more posts
+    ],
+    savedPosts: [],
+    taggedPosts: [],
+    highlights: [
+      {
+        id: 1,
+        title: "R1M 🏍️",
+        cover: "/images/stories/r1m-cover.jpg"
+      },
+      // ...more highlights
+    ],
+    stories: [
+      {
+        id: 1,
+        url: "/images/stories/story-1.jpg",
+        isVideo: false
+      }
+    ]
   },
   yamaha_official: {
     username: "yamaha_official",
@@ -59,6 +86,13 @@ export function ProfileView({ username }) {
     website: user.website,
   })
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState("posts")
+  const [showStoryViewer, setShowStoryViewer] = useState(false)
+  const [selectedStory, setSelectedStory] = useState(null)
+  const [showPostModal, setShowPostModal] = useState(false)
+  const [selectedPost, setSelectedPost] = useState(null)
+  const [showFollowersModal, setShowFollowersModal] = useState(false)
+  const [showFollowingModal, setShowFollowingModal] = useState(false)
 
   const handleFollow = () => {
     setIsFollowing(!isFollowing)
@@ -72,7 +106,7 @@ export function ProfileView({ username }) {
   }
 
   return (
-    <div className="w-full">
+    <div className="profile-container">
       {/* Header Image */}
       <div className="relative h-48 md:h-64 w-full">
         <img src={user.headerImage || "/placeholder.svg"} alt="Header" className="w-full h-full object-cover" />
@@ -204,28 +238,143 @@ export function ProfileView({ username }) {
             </div>
           </div>
 
-          {/* Tabs */}
-          <Tabs defaultValue="posts" className="mt-4">
-            <TabsList className="w-full">
-              <TabsTrigger value="posts" className="flex-1">
-                <Grid className="h-4 w-4 mr-2" />
-                Posts
+          {/* Stories Highlights */}
+          <div className="stories-highlights">
+            {user.highlights?.map((highlight) => (
+              <button 
+                key={highlight.id}
+                className="highlight-item"
+                onClick={() => handleHighlightClick(highlight)}
+              >
+                <img src={highlight.cover} alt={highlight.title} />
+                <span>{highlight.title}</span>
+              </button>
+            ))}
+            {user.isCurrentUser && (
+              <button className="add-highlight-btn">
+                <PlusIcon />
+                <span>New</span>
+              </button>
+            )}
+          </div>
+
+          {/* Profile Stats with Modals */}
+          <div className="profile-stats">
+            <button onClick={() => setShowPostModal(true)}>
+              <span className="stat-value">{user.posts}</span>
+              <span className="stat-label">posts</span>
+            </button>
+            <button onClick={() => setShowFollowersModal(true)}>
+              <span className="stat-value">{followerCount.toLocaleString()}</span>
+              <span className="stat-label">followers</span>
+            </button>
+            <button onClick={() => setShowFollowingModal(true)}>
+              <span className="stat-value">{user.following.toLocaleString()}</span>
+              <span className="stat-label">following</span>
+            </button>
+          </div>
+
+          {/* Enhanced Tabs */}
+          <Tabs defaultValue="posts" className="profile-tabs">
+            <TabsList>
+              <TabsTrigger value="posts">
+                <Grid className="tab-icon" />
+                POSTS
+              </TabsTrigger>
+              <TabsTrigger value="reels">
+                <Film className="tab-icon" />
+                REELS
+              </TabsTrigger>
+              <TabsTrigger value="saved">
+                <Bookmark className="tab-icon" />
+                SAVED
+              </TabsTrigger>
+              <TabsTrigger value="tagged">
+                <UserCircle className="tab-icon" />
+                TAGGED
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="posts" className="mt-6">
-              <div className="grid grid-cols-3 gap-1">
-                {user.images.map((image, index) => (
-                  <div key={index} className="aspect-square relative">
-                    <img
-                      src={image || "/placeholder.svg"}
-                      alt={`Post ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+
+            <TabsContent value="posts" className="posts-grid">
+              {user.images.map((post, index) => (
+                <div 
+                  key={post.id} 
+                  className="post-item"
+                  onClick={() => handlePostClick(post)}
+                >
+                  <img src={post.url} alt={`Post ${index + 1}`} />
+                  {post.isVideo && <Play className="video-indicator" />}
+                  <div className="post-overlay">
+                    <div className="post-stats">
+                      <span><Heart /> {post.likes}</span>
+                      <span><MessageCircle /> {post.comments}</span>
+                    </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </TabsContent>
+
+            {/* More TabsContent... */}
           </Tabs>
+
+          {/* Post Modal */}
+          {showPostModal && selectedPost && (
+            <Dialog open={showPostModal} onOpenChange={setShowPostModal}>
+              <DialogContent className="post-modal">
+                <div className="post-modal-content">
+                  <div className="post-modal-image">
+                    <img src={selectedPost.url} alt="Post" />
+                  </div>
+                  <div className="post-modal-details">
+                    {/* Post Header */}
+                    <div className="post-modal-header">
+                      <Avatar>
+                        <AvatarImage src={user.avatar} />
+                        <AvatarFallback>{user.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <span className="username">{user.username}</span>
+                      <Button variant="ghost" className="more-options">
+                        <MoreHorizontal />
+                      </Button>
+                    </div>
+
+                    {/* Comments Section */}
+                    <div className="post-modal-comments">
+                      {/* Comments list */}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="post-modal-actions">
+                      <div className="action-buttons">
+                        <Button variant="ghost"><Heart /></Button>
+                        <Button variant="ghost"><MessageCircle /></Button>
+                        <Button variant="ghost"><Send /></Button>
+                        <Button variant="ghost" className="ml-auto"><Bookmark /></Button>
+                      </div>
+                      <div className="likes-count">{selectedPost.likes} likes</div>
+                      <div className="post-timestamp">2 HOURS AGO</div>
+                    </div>
+
+                    {/* Add Comment */}
+                    <div className="add-comment">
+                      <Input 
+                        placeholder="Add a comment..."
+                        className="comment-input"
+                      />
+                      <Button variant="ghost">Post</Button>
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+
+          {/* Story Viewer */}
+          {showStoryViewer && (
+            <div className="story-viewer">
+              {/* Story viewer implementation */}
+            </div>
+          )}
         </div>
       </div>
     </div>
