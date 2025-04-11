@@ -1,0 +1,269 @@
+.search-container {
+  max-width: 935px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.search-header {
+  margin-bottom: 20px;
+}
+
+.search-form {
+  position: relative;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.search-form input {
+  width: 100%;
+  padding: 12px 40px 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--medium-gray);
+  background-color: var(--light-gray);
+  font-size: 16px;
+}
+
+.search-button {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--dark-gray);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.search-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--medium-gray);
+}
+
+.search-tab {
+  padding: 12px 20px;
+  font-weight: 600;
+  color: var(--dark-gray);
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.search-tab.active {
+  color: var(--yamaha-red);
+  border-bottom: 2px solid var(--yamaha-red);
+}
+
+.search-results {
+  background-color: var(--white);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.results-section {
+  margin-bottom: 24px;
+}
+
+.results-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  padding: 0 16px;
+}
+
+.user-results {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-result-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  transition: background-color 0.2s ease;
+}
+
+.user-result-item:hover {
+  background-color: var(--light-gray);
+}
+
+.user-result-item img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  margin-right: 12px;
+  object-fit: cover;
+}
+
+.user-result-info {
+  flex: 1;
+}
+
+.user-result-username {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.verified-badge {
+  color: var(--yamaha-red);
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.user-result-name {
+  color: var(--dark-gray);
+  margin-bottom: 2px;
+}
+
+.user-result-followers {
+  font-size: 12px;
+  color: var(--dark-gray);
+}
+
+.tag-results {
+  display: flex;
+  flex-direction: column;
+}
+
+.tag-result-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  transition: background-color 0.2s ease;
+}
+
+.tag-result-item:hover {
+  background-color: var(--light-gray);
+}
+
+.tag-result-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--light-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  font-size: 18px;
+}
+
+.tag-result-info {
+  flex: 1;
+}
+
+.tag-result-name {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.tag-result-count {
+  font-size: 12px;
+  color: var(--dark-gray);
+}
+
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.post-grid-item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.post-grid-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.post-grid-item:hover .post-overlay {
+  opacity: 1;
+}
+
+.post-stats {
+  display: flex;
+  gap: 30px;
+}
+
+.post-stat {
+  color: var(--white);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.post-stat i {
+  margin-right: 8px;
+}
+
+.user-results.full,
+.tag-results.full {
+  background-color: var(--white);
+  border-radius: 8px;
+  border: 1px solid var(--medium-gray);
+}
+
+.posts-grid.full {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.search-placeholder,
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: var(--dark-gray);
+  text-align: center;
+}
+
+.search-placeholder i,
+.no-results i {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.search-placeholder h3,
+.no-results h3 {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+  .posts-grid.full {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .posts-grid.full {
+    grid-template-columns: 1fr;
+  }
+}

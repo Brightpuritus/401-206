@@ -1,42 +1,75 @@
-#root {
-  max-width: 1280px;
+:root {
+  --yamaha-red: #e60012;
+  --yamaha-dark-red: #c00010;
+  --white: #ffffff;
+  --light-gray: #f0f0f0;
+  --medium-gray: #dbdbdb;
+  --dark-gray: #8e8e8e;
+  --black: #262626;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--light-gray);
+  color: var(--black);
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding-top: 60px;
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.btn-primary {
+  background-color: var(--yamaha-red);
+  color: var(--white);
+}
+
+.btn-primary:hover {
+  background-color: var(--yamaha-dark-red);
+}
+
+.btn-secondary {
+  background-color: var(--white);
+  color: var(--yamaha-red);
+  border: 1px solid var(--yamaha-red);
+}
+
+.btn-secondary:hover {
+  background-color: var(--light-gray);
 }
 
 .card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+  background-color: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  overflow: hidden;
 }

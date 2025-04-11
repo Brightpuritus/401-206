@@ -1,0 +1,220 @@
+.profile-container {
+  max-width: 935px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.profile-header {
+  display: flex;
+  margin-bottom: 44px;
+}
+
+.profile-avatar {
+  width: 150px;
+  height: 150px;
+  margin-right: 100px;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--medium-gray);
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-top {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.profile-username {
+  font-size: 28px;
+  font-weight: 300;
+  margin-right: 20px;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.profile-stats {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.stat {
+  margin-right: 40px;
+}
+
+.stat-value {
+  font-weight: 600;
+}
+
+.profile-bio {
+  max-width: 400px;
+}
+
+.profile-name {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.profile-website {
+  display: block;
+  margin-top: 4px;
+  color: var(--yamaha-red);
+  font-weight: 600;
+}
+
+.profile-tabs {
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid var(--medium-gray);
+  margin-bottom: 20px;
+}
+
+.profile-tab {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  margin: 0 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--dark-gray);
+  border-top: 1px solid transparent;
+  margin-top: -1px;
+}
+
+.profile-tab.active {
+  color: var(--black);
+  border-top: 1px solid var(--black);
+}
+
+.profile-tab i {
+  margin-right: 6px;
+}
+
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.post-grid-item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.post-grid-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.post-grid-item:hover .post-overlay {
+  opacity: 1;
+}
+
+.post-stats {
+  display: flex;
+  gap: 30px;
+}
+
+.post-stat {
+  color: var(--white);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.post-stat i {
+  margin-right: 8px;
+}
+
+.no-posts,
+.private-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: var(--dark-gray);
+  text-align: center;
+}
+
+.no-posts i,
+.private-content i {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.no-posts h3,
+.private-content h3 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 735px) {
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-avatar {
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+
+  .profile-top {
+    flex-direction: column;
+  }
+
+  .profile-username {
+    margin-right: 0;
+    margin-bottom: 12px;
+  }
+
+  .profile-stats {
+    justify-content: center;
+  }
+
+  .profile-bio {
+    max-width: 100%;
+  }
+
+  .posts-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3px;
+  }
+}
+
+@media (max-width: 480px) {
+  .posts-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,28 +1,43 @@
-import { Routes, Route, Navigate } from "react-router-dom"
-import LoginPage from "./pages/LoginPage"
-import RegisterPage from "./pages/RegisterPage"
-import HomePage from "./pages/HomePage"
-import ProfilePage from "./pages/ProfilePage"
-import MessagesPage from "./pages/MessagesPage"
-import SearchPage from "./pages/SearchPage"
-import NotificationsPage from "./pages/NotificationsPage"
-import SettingsPage from "./pages/SettingsPage"
+"use client"
+
+import { useState } from "react"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import Navbar from "./components/Navbar"
+import Home from "./pages/Home"
+import Profile from "./pages/Profile"
+import Messages from "./pages/Messages"
+import Notifications from "./pages/Notifications"
+import CreatePost from "./pages/CreatePost"
+import Search from "./pages/Search"
+import "./App.css"
 
 function App() {
-  // In a real app, you would check if the user is authenticated
-  const isAuthenticated = false
+  const [currentUser, setCurrentUser] = useState({
+    id: 1,
+    username: "yamaha_rider",
+    fullName: "Yamaha Rider",
+    avatar: "/assets/profile-default.jpg",
+    followers: 245,
+    following: 123,
+    bio: "Passionate about Yamaha motorcycles and music instruments!",
+  })
 
   return (
-    <Routes>
-      <Route path="/" element={isAuthenticated ? <Navigate to="/home" /> : <LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/home" element={<HomePage />} />
-      <Route path="/profile/:username" element={<ProfilePage />} />
-      <Route path="/messages" element={<MessagesPage />} />
-      <Route path="/search" element={<SearchPage />} />
-      <Route path="/notifications" element={<NotificationsPage />} />
-      <Route path="/settings" element={<SettingsPage />} />
-    </Routes>
+    <Router>
+      <div className="app">
+        <Navbar currentUser={currentUser} />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Home currentUser={currentUser} />} />
+            <Route path="/profile/:username" element={<Profile currentUser={currentUser} />} />
+            <Route path="/messages" element={<Messages currentUser={currentUser} />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/create" element={<CreatePost currentUser={currentUser} />} />
+            <Route path="/search" element={<Search />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
   )
 }
 
