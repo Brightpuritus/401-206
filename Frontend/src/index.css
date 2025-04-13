@@ -3,6 +3,15 @@
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light;
+  --primary-color: #e31837;
+  --background-color: #ffffff;
+  --text-color: #333333;
+}
+
+.dark-theme {
+  --primary-color: #ff4646;
+  --background-color: #121212;
+  --text-color: #ffffff;
 }
 
 a {
@@ -13,4 +22,9 @@ a {
 img {
   max-width: 100%;
   height: auto;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
 }
