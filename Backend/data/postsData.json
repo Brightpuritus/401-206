@@ -1,0 +1,28 @@
+{
+  "posts": [
+    {
+      "id": 1,
+      "username": "john_doe",
+      "image": "/assets/post-1.jpg",
+      "caption": "Exploring the mountains!",
+      "likes": 150,
+      "comments": []
+    },
+    {
+      "id": 2,
+      "username": "yamaha_official",
+      "image": "/assets/post-2.jpg",
+      "caption": "Introducing the all-new Yamaha R1M.",
+      "likes": 1245,
+      "comments": []
+    },
+    {
+      "id": 3,
+      "username": "yamaha_official",
+      "image": "/assets/post-3.jpg",
+      "caption": "The new Yamaha Grand Piano.",
+      "likes": 876,
+      "comments": []
+    }
+  ]
+}

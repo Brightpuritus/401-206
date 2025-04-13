@@ -1,0 +1,24 @@
+{
+  "profiles": [
+    {
+      "id": 1,
+      "username": "john_doe",
+      "fullName": "John Doe",
+      "avatar": "/assets/john-avatar.jpg",
+      "followers": 1200,
+      "following": 300,
+      "bio": "Photographer & Traveler",
+      "website": "www.johndoe.com"
+    },
+    {
+      "id": 2,
+      "username": "yamaha_official",
+      "fullName": "Yamaha Official",
+      "avatar": "/assets/yamaha-profile.jpg",
+      "followers": 1500000,
+      "following": 50,
+      "bio": "Official Yamaha account. Revs your heart with motorcycles, musical instruments, and marine products.",
+      "website": "www.yamaha.com"
+    }
+  ]
+}
