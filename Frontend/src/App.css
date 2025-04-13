@@ -6,6 +6,11 @@
   --medium-gray: #dbdbdb;
   --dark-gray: #8e8e8e;
   --black: #262626;
+  --auth-max-width: 380px;
+  --auth-padding: 2.5rem;
+  --auth-border-radius: 4px;
+  --auth-card-width: 380px;
+  --auth-card-padding: 2.5rem;
 }
 
 * {
@@ -72,4 +77,9 @@ button {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
   overflow: hidden;
+}
+
+.auth-main {
+  width: 100%;
+  min-height: 100vh;100vh;
 }

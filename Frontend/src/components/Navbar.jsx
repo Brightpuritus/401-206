@@ -4,8 +4,10 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import "./Navbar.css"
 
-const Navbar = ({ currentUser }) => {
+const Navbar = ({ currentUser, setCurrentUser }) => {
   const [searchQuery, setSearchQuery] = useState("")
+  const [showSettings, setShowSettings] = useState(false)
+  const [isDarkTheme, setIsDarkTheme] = useState(false)
   const navigate = useNavigate()
 
   const handleSearch = (e) => {
@@ -13,6 +15,18 @@ const Navbar = ({ currentUser }) => {
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`)
     }
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setCurrentUser(null)
+    navigate('/login')
+  }
+
+  const toggleTheme = () => {
+    setIsDarkTheme(!isDarkTheme)
+    document.body.classList.toggle('dark-theme')
   }
 
   return (
@@ -37,7 +51,7 @@ const Navbar = ({ currentUser }) => {
         </form>
 
         <div className="navbar-menu">
-          <Link to="/" className="nav-item">
+          <Link to="/home" className="nav-item">
             <i className="fa-solid fa-house"></i>
           </Link>
           <Link to="/messages" className="nav-item">
@@ -49,6 +63,24 @@ const Navbar = ({ currentUser }) => {
           <Link to="/notifications" className="nav-item">
             <i className="fa-solid fa-bell"></i>
           </Link>
+          <div className="nav-item settings-menu">
+            <button 
+              className="settings-button"
+              onClick={() => setShowSettings(!showSettings)}
+            >
+              <i className="fa-solid fa-gear"></i>
+            </button>
+            {showSettings && (
+              <div className="settings-dropdown">
+                <Link to={`/profile/${currentUser.username}`}>Profile</Link>
+                <Link to="/settings">Settings</Link>
+                <button onClick={toggleTheme}>
+                  {isDarkTheme ? 'Light Theme' : 'Dark Theme'}
+                </button>
+                <button onClick={handleLogout}>Logout</button>
+              </div>
+            )}
+          </div>
           <Link to={`/profile/${currentUser.username}`} className="nav-item profile-pic">
             <img src={currentUser.avatar || "/placeholder.svg"} alt={currentUser.username} />
           </Link>
