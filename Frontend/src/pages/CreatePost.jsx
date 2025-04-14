@@ -46,14 +46,38 @@ const CreatePost = ({ currentUser }) => {
   }
 
   const handleSubmit = async () => {
-    setIsSubmitting(true)
-
-    // Simulate API call to create post
-    setTimeout(() => {
-      setIsSubmitting(false)
-      navigate("/")
-    }, 2000)
-  }
+    if (!selectedImage || !caption.trim()) {
+      alert("Please select an image and write a caption.");
+      return;
+    }
+  
+    setIsSubmitting(true);
+  
+    const formData = new FormData();
+    formData.append("image", selectedImage);
+    formData.append("username", currentUser.username);
+    formData.append("caption", caption);
+  
+    try {
+      const response = await fetch("http://localhost:5000/api/posts", {
+        method: "POST",
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to create post");
+      }
+  
+      const data = await response.json();
+      console.log("Post created:", data);
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to create post. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="create-post-container">

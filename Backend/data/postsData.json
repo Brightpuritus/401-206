@@ -3,7 +3,7 @@
     {
       "id": 1,
       "username": "john_doe",
-      "image": "/assets/post-1.jpg",
+      "image": "/uploads/post-1.jpg",
       "caption": "Exploring the mountains!",
       "likes": 150,
       "comments": []
@@ -11,7 +11,7 @@
     {
       "id": 2,
       "username": "yamaha_official",
-      "image": "/assets/post-2.jpg",
+      "image": "/uploads/post-2.jpg",
       "caption": "Introducing the all-new Yamaha R1M.",
       "likes": 1245,
       "comments": []
@@ -19,9 +19,25 @@
     {
       "id": 3,
       "username": "yamaha_official",
-      "image": "/assets/post-3.jpg",
+      "image": "/uploads/post-3.jpg",
       "caption": "The new Yamaha Grand Piano.",
       "likes": 876,
+      "comments": []
+    },
+    {
+      "id": 4,
+      "username": "KK",
+      "image": "/uploads/156eb0fec4de2756ff2ad15c3ba2c349",
+      "caption": "test",
+      "likes": 0,
+      "comments": []
+    },
+    {
+      "id": 5,
+      "username": "KK",
+      "image": "/uploads/13a3375f161d7fae3c1888e009d71e30",
+      "caption": "tttttt",
+      "likes": 0,
       "comments": []
     }
   ]
