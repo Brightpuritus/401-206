@@ -11,6 +11,7 @@ app.use(cors());
 // Paths to JSON files
 const profileDataPath = path.join(__dirname, "data", "profileData.json");
 const postsDataPath = path.join(__dirname, "data", "postsData.json");
+const userDataPath = path.join(__dirname, "data", "Userdata.json");
 
 // Get all profiles
 app.get("/api/profiles", (req, res) => {
@@ -75,6 +76,87 @@ app.get("/api/posts/:username", (req, res) => {
     const posts = JSON.parse(data).posts;
     const userPosts = posts.filter((post) => post.username === username);
     res.json(userPosts);
+  });
+});
+
+// API สำหรับบันทึกข้อมูลผู้ใช้
+app.post("/api/register", (req, res) => {
+  const newUser = req.body;
+
+  // อ่านข้อมูลปัจจุบันจาก profileData.json
+  fs.readFile(profileDataPath, "utf8", (err, data) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to read profile data" });
+    }
+
+    const profiles = data ? JSON.parse(data).profiles : [];
+
+    // ตรวจสอบว่ามี username หรือ email ซ้ำหรือไม่
+    const isDuplicate = profiles.some(
+      (profile) => profile.username === newUser.username || profile.email === newUser.email
+    );
+
+    if (isDuplicate) {
+      return res.status(400).json({ error: "Username or email already exists" });
+    }
+
+    // เพิ่มผู้ใช้ใหม่พร้อมค่าเริ่มต้น
+    const newProfile = {
+      id: profiles.length + 1, // สร้าง ID ใหม่
+      username: newUser.username,
+      fullName: newUser.fullname,
+      email: newUser.email,
+      password: newUser.password,
+      avatar: "",
+      followers: 0,
+      following: 0,
+      bio: "",
+      website: "",
+    };
+
+    profiles.push(newProfile);
+
+    // เขียนข้อมูลใหม่ลงใน profileData.json
+    fs.writeFile(
+      profileDataPath,
+      JSON.stringify({ profiles }, null, 2),
+      (err) => {
+        if (err) {
+          return res.status(500).json({ error: "Failed to save profile data" });
+        }
+        res.status(201).json({ message: "User registered successfully" });
+      }
+    );
+  });
+});
+
+// API สำหรับตรวจสอบข้อมูลการเข้าสู่ระบบ
+app.post("/api/login", (req, res) => {
+  const { identifier, password } = req.body; // identifier คือ username หรือ email
+
+  // อ่านข้อมูลผู้ใช้จาก profileData.json
+  fs.readFile(profileDataPath, "utf8", (err, data) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to read profile data" });
+    }
+
+    const profiles = data ? JSON.parse(data).profiles : [];
+
+    // ค้นหาผู้ใช้ที่ตรงกับ username หรือ email และ password
+    const user = profiles.find(
+      (profile) =>
+        (profile.username.toLowerCase() === identifier.toLowerCase() || // ตรวจสอบ username แบบ case-insensitive
+         profile.email.toLowerCase() === identifier.toLowerCase()) &&
+        profile.password === password
+    );
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid username/email or password" });
+    }
+
+    // ส่งข้อมูลผู้ใช้กลับไป (ไม่ควรส่ง password)
+    const { password: _, ...userWithoutPassword } = user;
+    res.status(200).json({ message: "Login successful", user: userWithoutPassword });
   });
 });
 

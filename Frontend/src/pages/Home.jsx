@@ -160,7 +160,7 @@ const Home = ({ currentUser }) => {
           </div>
         </div>
 
-        <div className="yamaha-ad card">
+        <div className="yamaha-ad card">user-profile card
           <h4>Yamaha Special Offers</h4>
           <img src="/assets/yamaha-ad.jpg" alt="Yamaha Special Offers" />
           <p>Limited time offer on selected Yamaha products. Click to learn more!</p>

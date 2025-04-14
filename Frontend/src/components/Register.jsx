@@ -1,20 +1,39 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import '../styles/auth.css';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "../styles/auth.css";
 
 function Register() {
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    username: "",
+    fullname: "",
+    email: "",
+    password: "",
   });
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add registration logic here
-    navigate('/login');
+
+    try {
+      const response = await fetch("http://localhost:5000/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        alert("Registration successful!");
+        navigate("/login");
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || "Failed to register. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error registering user:", error);
+      alert("An error occurred. Please try again.");
+    }
   };
 
   return (
@@ -28,7 +47,17 @@ function Register() {
               className="form-input"
               placeholder="Username"
               value={formData.username}
-              onChange={(e) => setFormData({...formData, username: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Fullname"
+              value={formData.fullname}
+              onChange={(e) => setFormData({ ...formData, fullname: e.target.value })}
               required
             />
           </div>
@@ -38,7 +67,7 @@ function Register() {
               className="form-input"
               placeholder="Email"
               value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
             />
           </div>
@@ -48,7 +77,7 @@ function Register() {
               className="form-input"
               placeholder="Password"
               value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
             />
           </div>

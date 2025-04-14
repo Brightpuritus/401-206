@@ -4,6 +4,8 @@
       "id": 1,
       "username": "john_doe",
       "fullName": "John Doe",
+      "email": "john_doe@gmail.com",
+      "password": "123",
       "avatar": "/assets/john-avatar.jpg",
       "followers": 1200,
       "following": 300,
@@ -14,11 +16,25 @@
       "id": 2,
       "username": "yamaha_official",
       "fullName": "Yamaha Official",
+      "email": "yamaha_official@gmail.com",
+      "password": "123",
       "avatar": "/assets/yamaha-profile.jpg",
       "followers": 1500000,
       "following": 50,
       "bio": "Official Yamaha account. Revs your heart with motorcycles, musical instruments, and marine products.",
       "website": "www.yamaha.com"
+    },
+    {
+      "id": 3,
+      "username": "KK",
+      "fullName": "Kamin",
+      "email": "KK@gmail.com",
+      "password": "123",
+      "avatar": "",
+      "followers": 0,
+      "following": 0,
+      "bio": "",
+      "website": ""
     }
   ]
 }

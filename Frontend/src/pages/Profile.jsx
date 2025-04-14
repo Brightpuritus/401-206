@@ -67,6 +67,8 @@ const Profile = () => {
         </div>
         <div className="profile-info">
           <h2>{profile.username}</h2>
+          <h3>followers : {profile.followers}</h3>
+          <h3>following : {profile.following}</h3>
           <p>{profile.bio}</p>
           <a href={`https://${profile.website}`} target="_blank" rel="noopener noreferrer">
             {profile.website}

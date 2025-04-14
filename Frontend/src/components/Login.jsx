@@ -1,29 +1,40 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import '../styles/auth.css';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "../styles/auth.css";
 
 function Login({ setCurrentUser }) {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    identifier: "", // ใช้สำหรับ username หรือ email
+    password: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.email === 'admin@gmail.com' && formData.password === '123') {
-      const userData = {
-        id: 1,
-        email: 'admin@gmail.com',
-        name: 'Admin User'
-      };
-      localStorage.setItem('token', 'mock-jwt-token');
-      localStorage.setItem('user', JSON.stringify(userData));
-      setCurrentUser(userData);
-      navigate('/home');
-    } else {
-      setError('Invalid email or password');
+
+    try {
+      const response = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem("token", "mock-jwt-token"); // จำลอง JWT
+        localStorage.setItem("user", JSON.stringify(data.user));
+        setCurrentUser(data.user);
+        navigate("/home");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to login. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error logging in:", error);
+      setError("An error occurred. Please try again.");
     }
   };
 
@@ -35,11 +46,11 @@ function Login({ setCurrentUser }) {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <input
-              type="email"
+              type="text"
               className="form-input"
-              placeholder="Email"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              placeholder="Username or Email"
+              value={formData.identifier}
+              onChange={(e) => setFormData({ ...formData, identifier: e.target.value })}
               required
             />
           </div>
@@ -49,7 +60,7 @@ function Login({ setCurrentUser }) {
               className="form-input"
               placeholder="Password"
               value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
             />
           </div>
