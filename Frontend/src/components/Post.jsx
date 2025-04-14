@@ -5,48 +5,48 @@ import { Link } from "react-router-dom"
 import "./Post.css"
 
 const Post = ({ post, currentUser }) => {
-  const [isLiked, setIsLiked] = useState(post.isLikedByCurrentUser || false)
-  const [isSaved, setIsSaved] = useState(post.isSavedByCurrentUser || false)
-  const [likesCount, setLikesCount] = useState(post.likes)
-  const [comment, setComment] = useState("")
-  const [comments, setComments] = useState(post.comments || [])
-  const [showAllComments, setShowAllComments] = useState(false)
+  const [isLiked, setIsLiked] = useState(post.isLikedByCurrentUser || false);
+  const [isSaved, setIsSaved] = useState(post.isSavedByCurrentUser || false);
+  const [likesCount, setLikesCount] = useState(post.likes);
+  const [comment, setComment] = useState("");
+  const [comments, setComments] = useState(post.comments || []);
+  const [showAllComments, setShowAllComments] = useState(false);
 
   const handleLike = () => {
     if (isLiked) {
-      setLikesCount(likesCount - 1)
+      setLikesCount(likesCount - 1);
     } else {
-      setLikesCount(likesCount + 1)
+      setLikesCount(likesCount + 1);
     }
-    setIsLiked(!isLiked)
-  }
+    setIsLiked(!isLiked);
+  };
 
   const handleSave = () => {
-    setIsSaved(!isSaved)
-  }
+    setIsSaved(!isSaved);
+  };
 
   const handleComment = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (comment.trim()) {
       const newComment = {
         id: Date.now(),
         user: currentUser,
         text: comment,
         timestamp: new Date().toISOString(),
-      }
-      setComments([...comments, newComment])
-      setComment("")
+      };
+      setComments([...comments, newComment]);
+      setComment("");
     }
-  }
+  };
 
-  const displayedComments = showAllComments ? comments : comments.slice(0, 2)
+  const displayedComments = showAllComments ? comments : comments.slice(0, 2);
 
   return (
     <div className="post card">
       <div className="post-header">
-        <Link to={`/profile/${post.user.username}`} className="post-user">
-          <img src={post.user.avatar || "/placeholder.svg"} alt={post.user.username} className="post-avatar" />
-          <span className="post-username">{post.user.username}</span>
+        <Link to={`/profile/${post.username}`} className="post-user">
+          <img src={post.avatar || "/placeholder.svg"} alt={post.username} className="post-avatar" />
+          <span className="post-username">{post.username}</span>
         </Link>
         <button className="post-more">
           <i className="fa-solid fa-ellipsis"></i>
@@ -79,8 +79,8 @@ const Post = ({ post, currentUser }) => {
       </div>
 
       <div className="post-caption">
-        <Link to={`/profile/${post.user.username}`} className="post-username">
-          {post.user.username}
+        <Link to={`/profile/${post.username}`} className="post-username">
+          {post.username}
         </Link>{" "}
         {post.caption}
       </div>
@@ -125,7 +125,7 @@ const Post = ({ post, currentUser }) => {
         )}
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default Post
+export default Post;

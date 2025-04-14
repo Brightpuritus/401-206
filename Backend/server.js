@@ -2,16 +2,83 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
+const multer = require("multer");
 const app = express();
 const PORT = 5000;
 
 app.use(express.json());
 app.use(cors());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Paths to JSON files
 const profileDataPath = path.join(__dirname, "data", "profileData.json");
 const postsDataPath = path.join(__dirname, "data", "postsData.json");
 const userDataPath = path.join(__dirname, "data", "Userdata.json");
+
+// Setup multer for file uploads
+const upload = multer({
+  dest: path.join(__dirname, "uploads"),
+  limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
+});
+
+
+// Create a new post
+app.post("/api/posts", upload.single("image"), (req, res) => {
+  try {
+    const { username, caption } = req.body;
+    const image = req.file;
+
+    if (!username || !caption || !image) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    fs.readFile(postsDataPath, "utf8", (err, data) => {
+      if (err) {
+        console.error("Error reading posts data:", err);
+        return res.status(500).json({ error: "Failed to read posts data" });
+      }
+
+      const posts = data ? JSON.parse(data).posts : [];
+      const newPost = {
+        id: posts.length + 1,
+        username,
+        image: `/uploads/${image.filename}`,
+        caption,
+        likes: 0,
+        comments: [],
+      };
+
+      posts.push(newPost);
+
+      fs.writeFile(
+        postsDataPath,
+        JSON.stringify({ posts }, null, 2),
+        (err) => {
+          if (err) {
+            console.error("Error writing posts data:", err);
+            return res.status(500).json({ error: "Failed to save post data" });
+          }
+          res.status(201).json({ message: "Post created successfully", post: newPost });
+        }
+      );
+    });
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.get("/api/posts", (req, res) => {
+  fs.readFile(postsDataPath, "utf8", (err, data) => {
+    if (err) {
+      console.error("Error reading posts data:", err);
+      return res.status(500).json({ error: "Failed to read posts data" });
+    }
+
+    const posts = data ? JSON.parse(data).posts : [];
+    res.json(posts);
+  });
+});
 
 // Get all profiles
 app.get("/api/profiles", (req, res) => {
