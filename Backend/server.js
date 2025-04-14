@@ -1,9 +1,9 @@
 const express = require("express");
-const fs = require("fs");
+const fs = require("fs").promises;
 const path = require("path");
 const cors = require("cors");
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(cors());
@@ -24,59 +24,74 @@ app.get("/api/profiles", (req, res) => {
 });
 
 // Get a specific profile by username
-app.get("/api/profiles/:username", (req, res) => {
-  const username = req.params.username;
-  fs.readFile(profileDataPath, "utf8", (err, data) => {
-    if (err) {
-      return res.status(500).json({ error: "Failed to read profiles data" });
-    }
-    const profiles = JSON.parse(data).profiles;
-    const profile = profiles.find((p) => p.username === username);
+app.get("/api/profiles/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+    const data = await fs.readFile(path.join(__dirname, 'data', 'profileData.json'), 'utf8');
+    const { profiles } = JSON.parse(data);
+    const profile = profiles.find(p => p.username === username);
+    
     if (!profile) {
-      return res.status(404).json({ error: "Profile not found" });
+      return res.status(404).json({ error: 'Profile not found' });
     }
+    
     res.json(profile);
-  });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Update a profile
-app.put("/api/profiles/:username", (req, res) => {
-  const username = req.params.username;
-  const updatedData = req.body;
-
-  fs.readFile(profileDataPath, "utf8", (err, data) => {
-    if (err) {
-      return res.status(500).json({ error: "Failed to read data" });
-    }
-    const jsonData = JSON.parse(data);
-    const profiles = jsonData.profiles;
-    const profileIndex = profiles.findIndex((p) => p.username === username);
-
+app.put('/api/profiles/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { fullName } = req.body;
+    
+    const dataPath = path.join(__dirname, 'data', 'profileData.json');
+    const data = JSON.parse(await fs.readFile(dataPath, 'utf8'));
+    
+    const profileIndex = data.profiles.findIndex(p => p.id === parseInt(id));
     if (profileIndex === -1) {
-      return res.status(404).json({ error: "Profile not found" });
+      return res.status(404).json({ error: 'Profile not found' });
     }
-
-    profiles[profileIndex] = { ...profiles[profileIndex], ...updatedData };
-    fs.writeFile(profileDataPath, JSON.stringify(jsonData, null, 2), (err) => {
-      if (err) {
-        return res.status(500).json({ error: "Failed to update data" });
-      }
-      res.json(profiles[profileIndex]);
-    });
-  });
+    
+    data.profiles[profileIndex].fullName = fullName;
+    await fs.writeFile(dataPath, JSON.stringify(data, null, 2));
+    
+    res.json(data.profiles[profileIndex]);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // Get posts by username
-app.get("/api/posts/:username", (req, res) => {
-  const username = req.params.username;
-  fs.readFile(postsDataPath, "utf8", (err, data) => {
-    if (err) {
-      return res.status(500).json({ error: "Failed to read posts data" });
-    }
-    const posts = JSON.parse(data).posts;
-    const userPosts = posts.filter((post) => post.username === username);
-    res.json(userPosts);
-  });
+app.get("/api/posts/:username", async (req, res) => {
+  try {
+    // For now, return empty array since we don't have posts data
+    res.json([]);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get saved posts
+app.get('/api/saved/:username', async (req, res) => {
+  try {
+    // For now, return empty array
+    res.json([]);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get tagged posts
+app.get('/api/tagged/:username', async (req, res) => {
+  try {
+    // For now, return empty array
+    res.json([]);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // API สำหรับบันทึกข้อมูลผู้ใช้
