@@ -16,14 +16,33 @@ const postsDataPath = path.join(__dirname, "data", "postsData.json");
 const userDataPath = path.join(__dirname, "data", "Userdata.json");
 
 // Setup multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "uploads")); // กำหนดโฟลเดอร์ปลายทาง
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname); // ดึงนามสกุลไฟล์
+    const filename = `${Date.now()}-${file.originalname}`; // ตั้งชื่อไฟล์ใหม่ (เช่น timestamp-ชื่อไฟล์เดิม)
+    cb(null, filename);
+  },
+});
+
 const upload = multer({
-  dest: path.join(__dirname, "uploads"),
-  limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // จำกัดขนาดไฟล์ 5MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ["image/jpeg", "image/png"];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only .png and .jpg files are allowed"));
+    }
+  },
 });
 
 
 // Create a new post
-app.post("/api/posts", upload.single("image"), (req, res) => {
+app.post("/api/posts", upload.single("image"), async (req, res) => {
   try {
     const { username, caption } = req.body;
     const image = req.file;
@@ -32,62 +51,53 @@ app.post("/api/posts", upload.single("image"), (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    fs.readFile(postsDataPath, "utf8", (err, data) => {
-      if (err) {
-        console.error("Error reading posts data:", err);
-        return res.status(500).json({ error: "Failed to read posts data" });
-      }
+    const data = await fs.readFile(postsDataPath, "utf8");
+    const posts = data ? JSON.parse(data).posts : [];
 
-      const posts = data ? JSON.parse(data).posts : [];
-      const newPost = {
-        id: posts.length + 1,
-        username,
-        image: `/uploads/${image.filename}`,
-        caption,
-        likes: 0,
-        comments: [],
-      };
+    const newPost = {
+      id: posts.length + 1,
+      username,
+      image: `/uploads/${image.filename}`,
+      caption,
+      likes: 0,
+      comments: [],
+    };
 
-      posts.push(newPost);
+    posts.push(newPost);
 
-      fs.writeFile(
-        postsDataPath,
-        JSON.stringify({ posts }, null, 2),
-        (err) => {
-          if (err) {
-            console.error("Error writing posts data:", err);
-            return res.status(500).json({ error: "Failed to save post data" });
-          }
-          res.status(201).json({ message: "Post created successfully", post: newPost });
-        }
-      );
-    });
+    await fs.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
+    res.status(201).json({ message: "Post created successfully", post: newPost });
   } catch (error) {
+    if (error.message === "Only .png and .jpg files are allowed") {
+      return res.status(400).json({ error: error.message });
+    }
     console.error("Unexpected error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-app.get("/api/posts", (req, res) => {
-  fs.readFile(postsDataPath, "utf8", (err, data) => {
-    if (err) {
-      console.error("Error reading posts data:", err);
-      return res.status(500).json({ error: "Failed to read posts data" });
-    }
-
+// Get all posts
+app.get("/api/posts", async (req, res) => {
+  try {
+    const data = await fs.readFile(postsDataPath, "utf8");
     const posts = data ? JSON.parse(data).posts : [];
     res.json(posts);
-  });
+  } catch (error) {
+    console.error("Error reading posts data:", error);
+    res.status(500).json({ error: "Failed to read posts data" });
+  }
 });
 
 // Get all profiles
-app.get("/api/profiles", (req, res) => {
-  fs.readFile(profileDataPath, "utf8", (err, data) => {
-    if (err) {
-      return res.status(500).json({ error: "Failed to read profiles data" });
-    }
-    res.json(JSON.parse(data).profiles);
-  });
+app.get("/api/profiles", async (req, res) => {
+  try {
+    const data = await fs.readFile(profileDataPath, "utf8");
+    const profiles = JSON.parse(data).profiles;
+    res.json(profiles);
+  } catch (error) {
+    console.error("Error reading profiles data:", error);
+    res.status(500).json({ error: "Failed to read profiles data" });
+  }
 });
 
 // Get a specific profile by username
@@ -162,18 +172,13 @@ app.get('/api/tagged/:username', async (req, res) => {
 });
 
 // API สำหรับบันทึกข้อมูลผู้ใช้
-app.post("/api/register", (req, res) => {
-  const newUser = req.body;
-
-  // อ่านข้อมูลปัจจุบันจาก profileData.json
-  fs.readFile(profileDataPath, "utf8", (err, data) => {
-    if (err) {
-      return res.status(500).json({ error: "Failed to read profile data" });
-    }
-
+// API สำหรับบันทึกข้อมูลผู้ใช้
+app.post("/api/register", async (req, res) => {
+  try {
+    const newUser = req.body;
+    const data = await fs.readFile(profileDataPath, "utf8");
     const profiles = data ? JSON.parse(data).profiles : [];
 
-    // ตรวจสอบว่ามี username หรือ email ซ้ำหรือไม่
     const isDuplicate = profiles.some(
       (profile) => profile.username === newUser.username || profile.email === newUser.email
     );
@@ -182,9 +187,8 @@ app.post("/api/register", (req, res) => {
       return res.status(400).json({ error: "Username or email already exists" });
     }
 
-    // เพิ่มผู้ใช้ใหม่พร้อมค่าเริ่มต้น
     const newProfile = {
-      id: profiles.length + 1, // สร้าง ID ใหม่
+      id: profiles.length + 1,
       username: newUser.username,
       fullName: newUser.fullname,
       email: newUser.email,
@@ -198,18 +202,12 @@ app.post("/api/register", (req, res) => {
 
     profiles.push(newProfile);
 
-    // เขียนข้อมูลใหม่ลงใน profileData.json
-    fs.writeFile(
-      profileDataPath,
-      JSON.stringify({ profiles }, null, 2),
-      (err) => {
-        if (err) {
-          return res.status(500).json({ error: "Failed to save profile data" });
-        }
-        res.status(201).json({ message: "User registered successfully" });
-      }
-    );
-  });
+    await fs.writeFile(profileDataPath, JSON.stringify({ profiles }, null, 2));
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (error) {
+    console.error("Error saving profile data:", error);
+    res.status(500).json({ error: "Failed to save profile data" });
+  }
 });
 
 // API สำหรับตรวจสอบข้อมูลการเข้าสู่ระบบ

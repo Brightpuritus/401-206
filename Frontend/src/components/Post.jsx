@@ -54,7 +54,7 @@ const Post = ({ post, currentUser }) => {
       </div>
 
       <div className="post-image">
-        <img src={post.image || "/placeholder.svg"} alt="Post" />
+        <img src={`http://localhost:5000${post.image}`} alt="Post" />
       </div>
 
       <div className="post-actions">
