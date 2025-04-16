@@ -127,34 +127,44 @@ app.post("/api/posts/:id/toggle-like", async (req, res) => {
 });
 
 /// save post api
+app.post('/api/posts/:id/toggle-save', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username } = req.body;
 
-app.post("/api/posts/:id/toggle-save", (req, res) => {
-  const { id } = req.params;
-  const { username } = req.body;
+    // อ่านข้อมูล posts จากไฟล์ JSON
+    const data = await fs.readFile(postsDataPath, 'utf8');
+    const posts = JSON.parse(data).posts;
 
-  // ค้นหาโพสต์ตาม ID
-  const post = postsData.posts.find((p) => p.id === parseInt(id));
-  if (!post) {
-    return res.status(404).json({ error: "Post not found" });
+    // ค้นหาโพสต์ที่ต้องการ
+    const post = posts.find((p) => p.id === parseInt(id));
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    // ตรวจสอบและอัปเดต savedBy
+    if (!post.savedBy) {
+      post.savedBy = [];
+    }
+
+    if (post.savedBy.includes(username)) {
+      // ลบ username ออกจาก savedBy
+      post.savedBy = post.savedBy.filter((user) => user !== username);
+    } else {
+      // เพิ่ม username เข้าไปใน savedBy
+      post.savedBy.push(username);
+    }
+
+    // บันทึกข้อมูลกลับไปยังไฟล์ JSON
+    await fs.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
+
+    res.json({ isSaved: post.savedBy.includes(username) });
+  } catch (error) {
+    console.error('Error toggling save:', error);
+    res.status(500).json({ error: 'Failed to toggle save' });
   }
-
-  // ตรวจสอบว่ามีฟิลด์ savedBy หรือไม่
-  if (!post.savedBy) {
-    post.savedBy = [];
-  }
-
-  // สลับสถานะการบันทึกโพสต์
-  if (post.savedBy.includes(username)) {
-    post.savedBy = post.savedBy.filter((user) => user !== username);
-    res.json({ isSaved: false });
-  } else {
-    post.savedBy.push(username);
-    res.json({ isSaved: true });
-  }
-
-  // บันทึกการเปลี่ยนแปลงกลับไปยังไฟล์ JSON
-  fs.writeFileSync(postsFilePath, JSON.stringify(postsData, null, 2));
 });
+
 
 // เพิ่ม API สำหรับคอมเมนต์โพสต์
 app.post("/api/posts/:id/comment", async (req, res) => {

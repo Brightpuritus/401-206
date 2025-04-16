@@ -66,7 +66,7 @@ const Post = ({ post, currentUser }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username: currentUser.username }), // ตรวจสอบว่ามี username
+        body: JSON.stringify({ username: currentUser.username }),
       });
   
       if (!response.ok) {
@@ -75,7 +75,7 @@ const Post = ({ post, currentUser }) => {
       }
   
       const data = await response.json();
-      setIsSaved(data.isSaved);
+      setIsSaved(data.isSaved); // อัปเดตสถานะ Saved
     } catch (error) {
       console.error("Error toggling save:", error);
       alert(error.message);
@@ -123,8 +123,8 @@ const Post = ({ post, currentUser }) => {
   <div className="post-actions-right">
     {/* ปุ่มบันทึกโพสต์ */}
     <button className={`post-action ${isSaved ? "saved" : ""}`} onClick={handleSave}>
-  <i className={`fa-${isSaved ? "solid" : "regular"} fa-bookmark`}></i>
-</button>
+    <i className={`fa-${isSaved ? "solid" : "regular"} fa-bookmark`}></i>
+  </button>
   </div>
 </div>
 

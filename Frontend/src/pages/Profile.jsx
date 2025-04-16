@@ -41,12 +41,8 @@ const Profile = ({ currentUser }) => {
         setPosts(userPosts);
   
         // Fetch saved posts (mock data for now)
-        const savedResponse = await fetch(`http://localhost:5000/api/saved/${username}`);
-      if (!savedResponse.ok) {
-        throw new Error("Failed to fetch saved posts");
-      }
-      const savedData = await savedResponse.json();
-      setSavedPosts(savedData);
+        const savedPosts = allPosts.filter((post) => post.savedBy?.includes(username));
+        setSavedPosts(savedPosts);
   
         // Fetch tagged posts (mock data for now)
         const taggedResponse = await fetch(`http://localhost:5000/api/tagged/${username}`);

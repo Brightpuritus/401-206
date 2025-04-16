@@ -41,7 +41,14 @@ const Home = ({ currentUser }) => {
     <div className="home-container">
       <div className="posts-container">
         {posts.map((post) => (
-          <Post key={post.id} post={post} currentUser={currentUser} />
+          <Post
+          key={post.id}
+          post={{
+            ...post,
+            isSavedByCurrentUser: post.savedBy?.includes(currentUser.username), // เพิ่มฟิลด์นี้
+          }}
+          currentUser={currentUser}
+        />
         ))}
       </div>
 
