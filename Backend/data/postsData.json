@@ -5,31 +5,107 @@
       "username": "john_doe",
       "image": "/uploads/post-1.jpg",
       "caption": "Exploring the mountains!",
-      "likes": 150,
-      "comments": []
+      "likes": 151,
+      "likedBy": [
+        "KK"
+      ],
+      "savedBy": ["KK"],
+      "comments": [
+        {
+          "id": 1744815693603,
+          "username": "KK",
+          "text": "Good",
+          "timestamp": "2025-04-16T15:01:33.603Z"
+        },
+        {
+          "id": 1744815939751,
+          "username": "Tes",
+          "text": "GG",
+          "timestamp": "2025-04-16T15:05:39.751Z"
+        }
+      ]
     },
     {
       "id": 2,
       "username": "yamaha_official",
       "image": "/uploads/post-2.jpg",
       "caption": "Introducing the all-new Yamaha R1M.",
-      "likes": 1245,
-      "comments": []
+      "likes": 1246,
+      "comments": [
+        {
+          "id": 1744815707543,
+          "username": "KK",
+          "text": "Yes",
+          "timestamp": "2025-04-16T15:01:47.543Z"
+        },
+        {
+          "id": 1744815944725,
+          "username": "Tes",
+          "text": "No",
+          "timestamp": "2025-04-16T15:05:44.725Z"
+        }
+      ],
+      "likedBy": [
+        "KK"
+      ]
     },
     {
       "id": 3,
       "username": "yamaha_official",
       "image": "/uploads/post-3.jpg",
       "caption": "The new Yamaha Grand Piano.",
-      "likes": 876,
-      "comments": []
+      "likes": 877,
+      "likedBy": [
+        "KK"
+      ],
+      "comments": [
+        {
+          "id": 1744815710907,
+          "username": "KK",
+          "text": "DDDDD",
+          "timestamp": "2025-04-16T15:01:50.907Z"
+        },
+        {
+          "id": 1744815950256,
+          "username": "Tes",
+          "text": "KKKKKK",
+          "timestamp": "2025-04-16T15:05:50.256Z"
+        }
+      ]
     },
     {
       "id": 4,
       "username": "KK",
       "image": "/uploads/1744676773637-961745.png",
       "caption": "ttttttttt",
-      "likes": 0,
+      "likes": 3,
+      "likedBy": [
+        "KK"
+      ],
+      "comments": [
+        {
+          "id": 1744815716456,
+          "username": "KK",
+          "text": "Kuy",
+          "timestamp": "2025-04-16T15:01:56.456Z"
+        },
+        {
+          "id": 1744815953662,
+          "username": "Tes",
+          "text": "HEEEEE",
+          "timestamp": "2025-04-16T15:05:53.662Z"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "username": "KK",
+      "image": "/uploads/1744818040758-amongus2.jpg",
+      "caption": "SUS",
+      "likes": 1,
+      "likedBy": [
+        "KK"
+      ],
       "comments": []
     }
   ]

@@ -60,6 +60,7 @@ app.post("/api/posts", upload.single("image"), async (req, res) => {
       image: `/uploads/${image.filename}`,
       caption,
       likes: 0,
+      likedBy: [],
       comments: [],
     };
 
@@ -85,6 +86,108 @@ app.get("/api/posts", async (req, res) => {
   } catch (error) {
     console.error("Error reading posts data:", error);
     res.status(500).json({ error: "Failed to read posts data" });
+  }
+});
+
+// เพิ่ม API สำหรับไลค์โพสต์
+// API สำหรับไลค์โพสต์
+// API สำหรับไลค์/ยกเลิกไลค์โพสต์
+app.post("/api/posts/:id/toggle-like", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username } = req.body; // รับ username จาก request body
+    const data = await fs.readFile(postsDataPath, "utf8");
+    const posts = JSON.parse(data).posts;
+
+    const post = posts.find((p) => p.id === parseInt(id));
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    // ตรวจสอบว่า User ได้กดไลค์แล้วหรือยัง
+    if (post.likedBy && post.likedBy.includes(username)) {
+      // ยกเลิกการกดไลค์
+      post.likes -= 1;
+      post.likedBy = post.likedBy.filter((user) => user !== username);
+      await fs.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
+      return res.json({ message: "Like removed successfully", likes: post.likes });
+    }
+
+    // เพิ่มไลค์
+    post.likes += 1;
+    post.likedBy = post.likedBy || [];
+    post.likedBy.push(username);
+
+    await fs.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
+    res.json({ message: "Post liked successfully", likes: post.likes });
+  } catch (error) {
+    console.error("Error toggling like:", error);
+    res.status(500).json({ error: "Failed to toggle like" });
+  }
+});
+
+/// save post api
+
+app.post("/api/posts/:id/toggle-save", (req, res) => {
+  const { id } = req.params;
+  const { username } = req.body;
+
+  // ค้นหาโพสต์ตาม ID
+  const post = postsData.posts.find((p) => p.id === parseInt(id));
+  if (!post) {
+    return res.status(404).json({ error: "Post not found" });
+  }
+
+  // ตรวจสอบว่ามีฟิลด์ savedBy หรือไม่
+  if (!post.savedBy) {
+    post.savedBy = [];
+  }
+
+  // สลับสถานะการบันทึกโพสต์
+  if (post.savedBy.includes(username)) {
+    post.savedBy = post.savedBy.filter((user) => user !== username);
+    res.json({ isSaved: false });
+  } else {
+    post.savedBy.push(username);
+    res.json({ isSaved: true });
+  }
+
+  // บันทึกการเปลี่ยนแปลงกลับไปยังไฟล์ JSON
+  fs.writeFileSync(postsFilePath, JSON.stringify(postsData, null, 2));
+});
+
+// เพิ่ม API สำหรับคอมเมนต์โพสต์
+app.post("/api/posts/:id/comment", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username, text } = req.body;
+
+    if (!username || !text) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const data = await fs.readFile(postsDataPath, "utf8");
+    const posts = JSON.parse(data).posts;
+
+    const post = posts.find((p) => p.id === parseInt(id));
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    const newComment = {
+      id: Date.now(),
+      username,
+      text,
+      timestamp: new Date().toISOString(),
+    };
+
+    post.comments.push(newComment);
+
+    await fs.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
+    res.json({ message: "Comment added successfully", comments: post.comments });
+  } catch (error) {
+    console.error("Error adding comment:", error);
+    res.status(500).json({ error: "Failed to add comment" });
   }
 });
 
@@ -211,15 +314,13 @@ app.post("/api/register", async (req, res) => {
 });
 
 // API สำหรับตรวจสอบข้อมูลการเข้าสู่ระบบ
-app.post("/api/login", (req, res) => {
-  const { identifier, password } = req.body; // identifier คือ username หรือ email
+// API สำหรับตรวจสอบข้อมูลการเข้าสู่ระบบ
+app.post("/api/login", async (req, res) => {
+  try {
+    const { identifier, password } = req.body; // identifier คือ username หรือ email
 
-  // อ่านข้อมูลผู้ใช้จาก profileData.json
-  fs.readFile(profileDataPath, "utf8", (err, data) => {
-    if (err) {
-      return res.status(500).json({ error: "Failed to read profile data" });
-    }
-
+    // อ่านข้อมูลผู้ใช้จาก profileData.json
+    const data = await fs.readFile(profileDataPath, "utf8");
     const profiles = data ? JSON.parse(data).profiles : [];
 
     // ค้นหาผู้ใช้ที่ตรงกับ username หรือ email และ password
@@ -237,7 +338,10 @@ app.post("/api/login", (req, res) => {
     // ส่งข้อมูลผู้ใช้กลับไป (ไม่ควรส่ง password)
     const { password: _, ...userWithoutPassword } = user;
     res.status(200).json({ message: "Login successful", user: userWithoutPassword });
-  });
+  } catch (error) {
+    console.error("Error reading profile data:", error);
+    res.status(500).json({ error: "Failed to read profile data" });
+  }
 });
 
 app.listen(PORT, () => {

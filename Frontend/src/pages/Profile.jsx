@@ -28,23 +28,26 @@ const Profile = ({ currentUser }) => {
         const profileData = await profileResponse.json();
         setProfile(profileData);
         setNewFullName(profileData.fullName);
-
+  
         // Fetch all posts
         const postsResponse = await fetch(`http://localhost:5000/api/posts`);
         if (!postsResponse.ok) {
           throw new Error("Posts not found");
         }
         const allPosts = await postsResponse.json();
-
+  
         // Filter posts by username
-        const userPosts = allPosts.filter(post => post.username === username);
+        const userPosts = allPosts.filter((post) => post.username === username);
         setPosts(userPosts);
-
+  
         // Fetch saved posts (mock data for now)
         const savedResponse = await fetch(`http://localhost:5000/api/saved/${username}`);
-        const savedData = await savedResponse.json();
-        setSavedPosts(savedData);
-
+      if (!savedResponse.ok) {
+        throw new Error("Failed to fetch saved posts");
+      }
+      const savedData = await savedResponse.json();
+      setSavedPosts(savedData);
+  
         // Fetch tagged posts (mock data for now)
         const taggedResponse = await fetch(`http://localhost:5000/api/tagged/${username}`);
         const taggedData = await taggedResponse.json();
@@ -55,7 +58,7 @@ const Profile = ({ currentUser }) => {
         setLoading(false);
       }
     };
-
+  
     fetchProfileAndPosts();
   }, [username]);
 
@@ -185,30 +188,36 @@ const Profile = ({ currentUser }) => {
 
       {/* เนื้อหาของแท็บ */}
       <div className="profile-content">
-        {activeTab === "posts" && (
-          <div className="posts-grid">
-          {posts.map((post) => (
-            <div key={post.id} className="post-grid-item">
-              <img src={`http://localhost:5000${post.image}`} alt={post.caption} />
-              <div className="post-overlay">
-                <div className="post-stats">
-                  <span><i className="fas fa-heart"></i> {post.likes}</span>
-                  <span><i className="fas fa-comment"></i> {post.comments}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        )}
-        {activeTab === "saved" && (
-          <div className="posts-grid">
-            {savedPosts.map((post) => (
-              <div key={post.id} className="post-grid-item">
-                <img src={post.image} alt={post.caption} />
-              </div>
-            ))}
+      {activeTab === "posts" && (
+  <div className="posts-grid">
+    {posts.map((post) => (
+      <div key={post.id} className="post-grid-item">
+        <img src={`http://localhost:5000${post.image}`} alt={post.caption} />
+        <div className="post-overlay">
+          <div className="post-stats">
+            <span><i className="fas fa-heart"></i> {post.likes}</span>
+            <span><i className="fas fa-comment"></i> {post.comments.length}</span>
           </div>
-        )}
+        </div>
+      </div>
+    ))}
+  </div>
+)}
+        {activeTab === "saved" && (
+  <div className="posts-grid">
+    {savedPosts.map((post) => (
+      <div key={post.id} className="post-grid-item">
+        <img src={`http://localhost:5000${post.image}`} alt={post.caption} />
+        <div className="post-overlay">
+          <div className="post-stats">
+            <span><i className="fas fa-heart"></i> {post.likes}</span>
+            <span><i className="fas fa-comment"></i> {post.comments.length}</span>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
         {activeTab === "tagged" && (
           <div className="posts-grid">
             {taggedPosts.map((post) => (

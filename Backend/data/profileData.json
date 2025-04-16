@@ -35,6 +35,18 @@
       "following": 0,
       "bio": "",
       "website": ""
+    },
+    {
+      "id": 4,
+      "username": "Tes",
+      "fullName": "Testting",
+      "email": "Test@gmail.com",
+      "password": "111",
+      "avatar": "",
+      "followers": 0,
+      "following": 0,
+      "bio": "",
+      "website": ""
     }
   ]
 }
