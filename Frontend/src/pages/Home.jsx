@@ -16,6 +16,8 @@ const Home = ({ currentUser }) => {
           throw new Error("Failed to fetch posts");
         }
         const data = await response.json();
+        const sortedPosts = data.sort((a, b) => b.id - a.id);
+        setPosts(sortedPosts);
         console.log(data); // ตรวจสอบข้อมูลที่ได้รับ
         setPosts(data);
       } catch (error) {

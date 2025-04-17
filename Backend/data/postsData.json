@@ -5,9 +5,10 @@
       "username": "john_doe",
       "image": "/uploads/post-1.jpg",
       "caption": "Exploring the mountains!",
-      "likes": 151,
+      "likes": 152,
       "likedBy": [
-        "KK"
+        "KK",
+        "purchase"
       ],
       "savedBy": [
         "KK"
@@ -116,6 +117,17 @@
       ],
       "comments": [],
       "savedBy": []
+    },
+    {
+      "id": 6,
+      "username": "john_doe",
+      "image": "/uploads/1744896084568-Yamaha YZF-R7 2021 (13).jpg",
+      "caption": "oh look at my new buddy",
+      "likes": 1,
+      "likedBy": [
+        "john_doe"
+      ],
+      "comments": []
     }
   ]
 }
