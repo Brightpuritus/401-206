@@ -354,6 +354,28 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+// Endpoint สำหรับ postsData.json
+app.get("/api/posts", (req, res) => {
+  const filePath = path.join(__dirname, "data", "postsData.json");
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to load posts data" });
+    }
+    res.json(JSON.parse(data));
+  });
+});
+
+// Endpoint สำหรับ profileData.json
+app.get("/api/profiles", (req, res) => {
+  const filePath = path.join(__dirname, "data", "profileData.json");
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) {
+      return res.status(500).json({ error: "Failed to load profiles data" });
+    }
+    res.json(JSON.parse(data));
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
