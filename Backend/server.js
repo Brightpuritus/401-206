@@ -160,6 +160,65 @@ app.post("/api/posts/:id/toggle-like", async (req, res) => {
   }
 });
 
+// API สำหรับแก้ไขโพสต์
+app.put("/api/posts/:id", upload.single("image"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { caption } = req.body;
+
+    const data = await fsPromises.readFile(postsDataPath, "utf8");
+    const posts = JSON.parse(data).posts;
+
+    const postIndex = posts.findIndex((p) => p.id === parseInt(id));
+    if (postIndex === -1) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    // ลบรูปภาพเก่าออกจากระบบไฟล์ ถ้ามีการอัปโหลดรูปภาพใหม่
+    if (req.file) {
+      const oldImagePath = path.join(__dirname, posts[postIndex].image);
+      if (fs.existsSync(oldImagePath)) {
+        fs.unlinkSync(oldImagePath); // ลบไฟล์เก่า
+      }
+      posts[postIndex].image = `/uploads/${req.file.filename}`; // อัปเดตรูปภาพใหม่
+    }
+
+    // อัปเดต caption ถ้ามี
+    if (caption) {
+      posts[postIndex].caption = caption;
+    }
+
+    await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
+    res.json({ message: "Post updated successfully", post: posts[postIndex] });
+  } catch (error) {
+    console.error("Error updating post:", error);
+    res.status(500).json({ error: "Failed to update post" });
+  }
+});
+
+//;/ API สำหรับลบโพสต์
+app.delete("/api/posts/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const data = await fsPromises.readFile(postsDataPath, "utf8");
+    const posts = JSON.parse(data).posts;
+
+    const postIndex = posts.findIndex((p) => p.id === parseInt(id));
+    if (postIndex === -1) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    posts.splice(postIndex, 1); // ลบโพสต์ออกจากอาร์เรย์
+
+    await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
+    res.json({ message: "Post deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    res.status(500).json({ error: "Failed to delete post" });
+  }
+});
+
 /// save post api
 app.post('/api/posts/:id/toggle-save', async (req, res) => {
   try {

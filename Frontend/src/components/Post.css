@@ -132,3 +132,91 @@
   background: none;
   border: none;
 }
+
+
+/* css ของปุ่ม edit caption */
+.edit-btn {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-left: 10px;
+}
+
+.edit-caption input {
+  width: calc(100% - 100px);
+  margin-right: 10px;
+}
+
+.edit-caption button {
+  margin-right: 5px;
+}
+
+.post-more-container {
+  position: relative;
+}
+
+.post-more-menu {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.post-more-menu button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.post-more-menu button:hover {
+  background: #f5f5f5;
+}
+
+.edit-caption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.edit-caption input {
+  flex: 1;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.edit-caption button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.edit-caption button:first-of-type {
+  background-color: #007bff;
+  color: white;
+}
+
+.edit-caption button:last-of-type {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.post-more-menu button:last-of-type {
+  color: red;
+}
+
+.edit-caption input[type="file"] {
+  margin-top: 10px;
+}
+/*  */

@@ -115,8 +115,8 @@
     {
       "id": 5,
       "username": "KK",
-      "image": "/uploads/1744818040758-amongus2.jpg",
-      "caption": "SUS",
+      "image": "/uploads/1744987604933-Logo.png",
+      "caption": "Kuy",
       "likes": 1,
       "likedBy": [
         "KK"
@@ -141,6 +141,12 @@
           "username": "KK",
           "text": "eee",
           "timestamp": "2025-04-17T13:58:20.891Z"
+        },
+        {
+          "id": 1744986415302,
+          "username": "admin",
+          "text": "testt",
+          "timestamp": "2025-04-18T14:26:55.302Z"
         }
       ]
     }
