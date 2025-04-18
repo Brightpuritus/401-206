@@ -530,3 +530,134 @@
     transform: translate(-50%, -50%) rotate(360deg);
   }
 }
+
+.profile-follow-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.profile-follow-btn.follow {
+  background-color: #0095f6;
+  color: white;
+}
+
+.profile-follow-btn.unfollow {
+  background-color: #efefef;
+  color: black;
+  border: 1px solid #dbdbdb;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+/* Modal container */
+.followers-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Modal header */
+.followers-modal h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  text-align: center;
+}
+
+/* Followers list */
+.followers-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.follower-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.follower-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.close-modal-btn {
+  display: block;
+  margin: 10px auto 0;
+  padding: 8px 16px;
+  background: #0095f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.close-modal-btn:hover {
+  background: #007bb5;
+}
+
+/* Modal container for Following */
+.following-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Modal header */
+.following-modal h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  text-align: center;
+}
+
+/* Following list */
+.following-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.following-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.following-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}

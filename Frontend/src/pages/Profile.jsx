@@ -16,9 +16,25 @@ const Profile = ({ currentUser, onUpdateUser }) => {
   const [newFullName, setNewFullName] = useState("");
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const fileInputRef = useRef(null);
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [showFollowingModal, setShowFollowingModal] = useState(false);
 
   const isOwnProfile = currentUser?.id === profile?.id;
 
+  const handleShowFollowers = () => {
+    setShowFollowersModal(true);
+  };
+  
+  const handleCloseFollowersModal = () => {
+    setShowFollowersModal(false);
+  };
+  const handleShowFollowing = () => {
+    setShowFollowingModal(true);
+  };
+  
+  const handleCloseFollowingModal = () => {
+    setShowFollowingModal(false);
+  };
   useEffect(() => {
     const fetchProfileAndPosts = async () => {
       try {
@@ -123,6 +139,38 @@ const Profile = ({ currentUser, onUpdateUser }) => {
     }
   };
 
+  const handleToggleFollow = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/profiles/${profile.username}/toggle-follow`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ currentUser: currentUser.username }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to toggle follow");
+      }
+  
+      const data = await response.json();
+      setProfile((prev) => ({
+        ...prev,
+        followers: data.followers,
+      }));
+  
+      if (currentUser.username === profile.username) {
+        onUpdateUser((prev) => ({
+          ...prev,
+          following: data.following,
+        }));
+      }
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+      alert("Failed to toggle follow. Please try again.");
+    }
+  };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -132,6 +180,7 @@ const Profile = ({ currentUser, onUpdateUser }) => {
   }
 
   return (
+    
     <div className="profile-container">
       <div className="profile-header">
         <div className="profile-avatar">
@@ -164,26 +213,83 @@ const Profile = ({ currentUser, onUpdateUser }) => {
             )}
           </div>
         </div>
+
+
+
+
         <div className="profile-info">
-          <div className="profile-top">
+        <div className="profile-top">
             <h2 className="profile-username">{profile.username}</h2>
-            {isOwnProfile && (
-              <button className="profile-edit-btn" onClick={() => setIsEditingFullName(true)}>
+            
+ <button className="profile-edit-btn" onClick={() => setIsEditingFullName(true)}>
                 Edit Profile
               </button>
+            {currentUser.username !== profile.username && (
+              
+              <button
+                className={`profile-follow-btn ${
+                  profile.followers.includes(currentUser.username) ? "unfollow" : "follow"
+                }`}
+                onClick={handleToggleFollow}
+              >
+                {profile.followers.includes(currentUser.username) ? "Unfollow" : "Follow"}
+              </button>
             )}
-          </div>
-          <div className="profile-stats">
-            <div className="stat-item">
-              <span className="stat-value">{posts.length}</span> posts
-            </div>
-            <div className="stat-item">
-              <span className="stat-value">{profile.followers}</span> followers
-            </div>
-            <div className="stat-item">
-              <span className="stat-value">{profile.following}</span> following
-            </div>
-          </div>
+        </div>
+        <div className="profile-stats">
+  <div className="stat-item" onClick={handleShowFollowers}>
+    <span className="stat-value">{profile.followers.length}</span> followers
+  </div>
+  <div className="stat-item" onClick={handleShowFollowing}>
+    <span className="stat-value">{profile.following.length}</span> following
+  </div>
+</div>
+{showFollowingModal && (
+  <>
+    <div className="modal-overlay" onClick={handleCloseFollowingModal} />
+    <div className="following-modal">
+      <h3>Following</h3>
+      <ul className="following-list">
+        {profile.following.map((following) => (
+          <li key={following} className="following-item">
+            <img
+              src={`http://localhost:5000/avatars/${following}.png`} // สมมติว่า avatar มีชื่อไฟล์ตาม username
+              alt={following}
+              className="following-avatar"
+            />
+            <span>{following}</span>
+          </li>
+        ))}
+      </ul>
+      <button className="close-modal-btn" onClick={handleCloseFollowingModal}>
+        Close
+      </button>
+    </div>
+  </>
+)}
+{showFollowersModal && (
+  <>
+    <div className="modal-overlay" onClick={handleCloseFollowersModal} />
+    <div className="followers-modal">
+      <h3>Followers</h3>
+      <ul className="followers-list">
+        {profile.followers.map((follower) => (
+          <li key={follower} className="follower-item">
+            <img
+              src={`http://localhost:5000/avatars/${follower}.png`} // สมมติว่า avatar มีชื่อไฟล์ตาม username
+              alt={follower}
+              className="follower-avatar"
+            />
+            <span>{follower}</span>
+          </li>
+        ))}
+      </ul>
+      <button className="close-modal-btn" onClick={handleCloseFollowersModal}>
+        Close
+      </button>
+    </div>
+  </>
+)}
           <div className="profile-bio">
             <div className="profile-fullname">{profile.fullName}</div>
             <p>{profile.bio}</p>
