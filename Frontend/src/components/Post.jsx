@@ -30,6 +30,14 @@ const Post = ({ post, currentUser }) => {
   const [comments, setComments] = useState(post.comments || []);
   const [comment, setComment] = useState("");
   const [showAllComments, setShowAllComments] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedCaption, setEditedCaption] = useState(post.caption);
+  const [editedImage, setEditedImage] = useState(null);
+  const [showMenu, setShowMenu] = useState(false);
+
+const toggleMenu = () => {
+  setShowMenu(!showMenu);
+};
 
   const handleLike = async () => {
     try {
@@ -101,6 +109,58 @@ const Post = ({ post, currentUser }) => {
     }
   };
 
+  const handleEdit = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("caption", editedCaption);
+      if (editedImage) {
+        formData.append("image", editedImage); // เพิ่มรูปภาพใหม่
+      }
+  
+      const response = await fetch(`http://localhost:5000/api/posts/${post.id}`, {
+        method: "PUT",
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to update post");
+      }
+  
+      const data = await response.json();
+      setIsEditing(false); // ปิดโหมดแก้ไข
+      setEditedCaption(data.post.caption); // อัปเดตคำบรรยายใหม่
+      if (data.post.image) {
+        post.image = data.post.image; // อัปเดตรูปภาพใหม่
+      }
+  
+      // รีเฟรชหน้า
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating post:", error);
+      alert(error.message);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+  
+    try {
+      const response = await fetch(`http://localhost:5000/api/posts/${post.id}`, {
+        method: "DELETE",
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to delete post");
+      }
+  
+      alert("Post deleted successfully");
+      window.location.reload(); // รีเฟรชหน้าเพื่ออัปเดตโพสต์
+    } catch (error) {
+      console.error("Error deleting post:", error);
+      alert(error.message);
+    }
+  };
+
   const displayedComments = showAllComments ? comments : comments.slice(0, 2);
 
   return (
@@ -114,10 +174,22 @@ const Post = ({ post, currentUser }) => {
           />
           <span className="post-username">{post.username}</span>
         </Link>
-        <button className="post-more">
-          <i className="fa-solid fa-ellipsis"></i>
-        </button>
+        <div className="post-more-container">
+    <button className="post-more" onClick={toggleMenu}>
+      <i className="fa-solid fa-ellipsis"></i>
+    </button>
+    {showMenu && (
+     <div className="post-more-menu">
+     {post.username === currentUser.username && (
+       <>
+         <button onClick={() => setIsEditing(true)}>Edit Post</button>
+         <button onClick={handleDelete}>Delete Post</button>
+       </>
+     )}
+   </div>
+       )}
       </div>
+    </div>
 
       <div className="post-image">
         <img src={`http://localhost:5000${post.image}`} alt="Post" />
@@ -156,11 +228,30 @@ const Post = ({ post, currentUser }) => {
       </div>
 
       <div className="post-caption">
-        <Link to={`/profile/${post.username}`} className="post-username">
-          {post.username}
-        </Link>{" "}
-        {post.caption}
-      </div>
+  {isEditing ? (
+    <div className="edit-caption">
+      <input
+        type="text"
+        value={editedCaption}
+        onChange={(e) => setEditedCaption(e.target.value)}
+      />
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setEditedImage(e.target.files[0])}
+      />
+      <button onClick={handleEdit}>Save</button>
+      <button onClick={() => setIsEditing(false)}>Cancel</button>
+    </div>
+  ) : (
+    <>
+      <Link to={`/profile/${post.username}`} className="post-username">
+        {post.username}
+      </Link>{" "}
+      {post.caption}
+    </>
+  )}
+</div>
 
       {comments.length > 0 && (
   <div className="post-comments">
