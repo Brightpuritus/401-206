@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import "./Search.css";
 
 const Search = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || "");
   const [activeTab, setActiveTab] = useState("top");
   const [results, setResults] = useState({
     users: [],
@@ -48,10 +49,13 @@ const Search = () => {
     }
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    performSearch(searchQuery);
-  };
+  useEffect(() => {
+    const query = searchParams.get('q');
+    if (query) {
+      setSearchQuery(query);
+      performSearch(query);
+    }
+  }, [searchParams]);
 
   const formatCount = (count) => {
     if (count >= 1000000) {
@@ -65,20 +69,6 @@ const Search = () => {
 
   return (
     <div className="search-container">
-      <div className="search-header">
-        <form className="search-form" onSubmit={handleSearch}>
-          <input
-            type="text"
-            placeholder="Search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <button type="submit" className="search-button">
-            <i className="fa-solid fa-search"></i>
-          </button>
-        </form>
-      </div>
-
       {loading ? (
         <div className="loading-container">
           <div className="loading-spinner"></div>

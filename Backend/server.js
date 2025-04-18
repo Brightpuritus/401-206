@@ -374,7 +374,7 @@ app.post("/api/register", async (req, res) => {
       fullName: newUser.fullname,
       email: newUser.email,
       password: newUser.password,
-      avatar: "",
+      avatar: "/avatars/placeholder-person.jpg",
       followers: 0,
       following: 0,
       bio: "",
