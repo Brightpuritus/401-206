@@ -7,8 +7,8 @@
       "email": "john_doe@gmail.com",
       "password": "123",
       "avatar": "/avatars/1744903539480-320777985.png",
-      "followers": 1200,
-      "following": 300,
+      "followers": [],
+      "following": [],
       "bio": "Photographer & Traveler",
       "website": "www.johndoe.com"
     },
@@ -19,8 +19,10 @@
       "email": "yamaha_official@gmail.com",
       "password": "123",
       "avatar": "/assets/yamaha-profile.jpg",
-      "followers": 1500000,
-      "following": 50,
+      "followers": [
+        "KK"
+      ],
+      "following": [],
       "bio": "Official Yamaha account. Revs your heart with motorcycles, musical instruments, and marine products.",
       "website": "www.yamaha.com"
     },
@@ -30,7 +32,7 @@
       "fullName": "dqwdqwfdqfqeee",
       "email": "KK@gmail.com",
       "password": "123",
-      "avatar": "/avatars/1744982628960-360992076.png",
+      "avatar": "/avatars/1744904366360-806641185.png",
       "followers": 0,
       "following": 0,
       "bio": "",
@@ -43,8 +45,20 @@
       "email": "Test@gmail.com",
       "password": "111",
       "avatar": "",
-      "followers": 0,
-      "following": 0,
+      "followers": [],
+      "following": [],
+      "bio": "",
+      "website": ""
+    },
+    {
+      "id": 5,
+      "username": "BB",
+      "fullName": "Mr.beast",
+      "email": "mrbeast@gmail.com",
+      "password": "123",
+      "avatar": "",
+      "followers": [],
+      "following": [],
       "bio": "",
       "website": ""
     },

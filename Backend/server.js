@@ -413,7 +413,6 @@ app.get('/api/tagged/:username', async (req, res) => {
 });
 
 // API สำหรับบันทึกข้อมูลผู้ใช้
-// API สำหรับบันทึกข้อมูลผู้ใช้
 app.post("/api/register", async (req, res) => {
   try {
     const newUser = req.body;
@@ -434,9 +433,9 @@ app.post("/api/register", async (req, res) => {
       fullName: newUser.fullname,
       email: newUser.email,
       password: newUser.password,
-      avatar: "/avatars/placeholder-person.jpg",
-      followers: 0,
-      following: 0,
+      avatar: "",
+      followers: [],
+      following: [],
       bio: "",
       website: "",
     };
@@ -569,6 +568,53 @@ app.post("/api/chats", async (req, res) => {
   } catch (error) {
     console.error("Error saving chat data:", error);
     res.status(500).json({ error: "Failed to save chat data" });
+  }
+});
+
+// API: Follow or unfollow a user
+app.post("/api/profiles/:username/toggle-follow", async (req, res) => {
+  try {
+    const { username } = req.params;
+    const { currentUser } = req.body;
+
+    if (!currentUser) {
+      return res.status(400).json({ error: "Current user is required" });
+    }
+
+    const data = JSON.parse(await fsPromises.readFile(profileDataPath, "utf8"));
+    const profiles = data.profiles;
+
+    const userToFollow = profiles.find((profile) => profile.username === username);
+    const currentUserProfile = profiles.find((profile) => profile.username === currentUser);
+
+    if (!userToFollow || !currentUserProfile) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Check if already following
+    const isFollowing = currentUserProfile.following.includes(username);
+
+    if (isFollowing) {
+      // Unfollow
+      currentUserProfile.following = currentUserProfile.following.filter((u) => u !== username);
+      userToFollow.followers = userToFollow.followers.filter((u) => u !== currentUser);
+    } else {
+      // Follow
+      currentUserProfile.following.push(username);
+      userToFollow.followers.push(currentUser);
+    }
+
+    // Save changes
+    await fsPromises.writeFile(profileDataPath, JSON.stringify(data, null, 2));
+
+    res.json({
+      message: isFollowing ? "Unfollowed successfully" : "Followed successfully",
+      followers: userToFollow.followers,
+      following: currentUserProfile.following,
+    });
+  } catch (error) {
+    console.error("Error toggling follow:", error);
+    res.status(500).json({ error: "Failed to toggle follow" });
   }
 });
 
