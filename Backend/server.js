@@ -15,6 +15,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 const profileDataPath = path.join(__dirname, "data", "profileData.json");
 const postsDataPath = path.join(__dirname, "data", "postsData.json");
 const userDataPath = path.join(__dirname, "data", "Userdata.json");
+const chatDataPath = path.join(__dirname, "data", "chatData.json");
 
 // Setup multer for file uploads
 const storage = multer.diskStorage({
@@ -501,6 +502,74 @@ app.get("/api/profiles", (req, res) => {
     }
     res.json(JSON.parse(data));
   });
+});
+
+// API: Get chat messages between two users
+app.get("/api/chats/:user1/:user2", async (req, res) => {
+  try {
+    const { user1, user2 } = req.params;
+    const data = await fsPromises.readFile(chatDataPath, "utf8");
+    const chats = JSON.parse(data).chats;
+
+    // ค้นหาข้อความระหว่าง user1 และ user2
+    const conversation = chats.find(
+      (chat) =>
+        (chat.user1 === user1 && chat.user2 === user2) ||
+        (chat.user1 === user2 && chat.user2 === user1)
+    );
+
+    res.json(conversation ? conversation.messages : []);
+  } catch (error) {
+    console.error("Error reading chat data:", error);
+    res.status(500).json({ error: "Failed to read chat data" });
+  }
+});
+
+// API: Add a new message to the chat
+app.post("/api/chats", async (req, res) => {
+  try {
+    const { sender, recipient, text } = req.body;
+
+    if (!sender || !recipient || !text) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const data = await fsPromises.readFile(chatDataPath, "utf8");
+    const chats = JSON.parse(data).chats;
+
+    // ค้นหาหรือสร้างบทสนทนาใหม่
+    let conversation = chats.find(
+      (chat) =>
+        (chat.user1 === sender && chat.user2 === recipient) ||
+        (chat.user1 === recipient && chat.user2 === sender)
+    );
+
+    if (!conversation) {
+      conversation = {
+        user1: sender,
+        user2: recipient,
+        messages: [],
+      };
+      chats.push(conversation);
+    }
+
+    // เพิ่มข้อความใหม่
+    const newMessage = {
+      id: Date.now(),
+      sender,
+      text,
+      timestamp: new Date().toISOString(),
+    };
+    conversation.messages.push(newMessage);
+
+    // บันทึกข้อมูลกลับไปยังไฟล์ JSON
+    await fsPromises.writeFile(chatDataPath, JSON.stringify({ chats }, null, 2));
+
+    res.status(201).json(newMessage);
+  } catch (error) {
+    console.error("Error saving chat data:", error);
+    res.status(500).json({ error: "Failed to save chat data" });
+  }
 });
 
 app.listen(PORT, () => {
