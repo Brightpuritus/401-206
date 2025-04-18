@@ -1,5 +1,6 @@
 const express = require("express");
-const fs = require("fs").promises;
+const fs = require("fs");
+const fsPromises = require("fs").promises;
 const path = require("path");
 const cors = require("cors");
 const multer = require("multer");
@@ -40,6 +41,39 @@ const upload = multer({
   },
 });
 
+// Add avatar storage configuration
+const avatarStorage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    const dir = path.join(__dirname, 'public', 'avatars');
+    cb(null, dir);
+  },
+  filename: function(req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const uploadAvatar = multer({ storage: avatarStorage });
+
+// Add static middleware for serving avatars
+app.use('/avatars', express.static(path.join(__dirname, 'public', 'avatars')));
+
+// Create necessary directories
+const createRequiredDirectories = () => {
+  const dirs = [
+    path.join(__dirname, 'public'),
+    path.join(__dirname, 'public', 'avatars'),
+  ];
+
+  dirs.forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
+};
+
+// Call this before starting the server
+createRequiredDirectories();
 
 // Create a new post
 app.post("/api/posts", upload.single("image"), async (req, res) => {
@@ -51,7 +85,7 @@ app.post("/api/posts", upload.single("image"), async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const data = await fs.readFile(postsDataPath, "utf8");
+    const data = await fsPromises.readFile(postsDataPath, "utf8");
     const posts = data ? JSON.parse(data).posts : [];
 
     const newPost = {
@@ -66,7 +100,7 @@ app.post("/api/posts", upload.single("image"), async (req, res) => {
 
     posts.push(newPost);
 
-    await fs.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
+    await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
     res.status(201).json({ message: "Post created successfully", post: newPost });
   } catch (error) {
     if (error.message === "Only .png and .jpg files are allowed") {
@@ -80,7 +114,7 @@ app.post("/api/posts", upload.single("image"), async (req, res) => {
 // Get all posts
 app.get("/api/posts", async (req, res) => {
   try {
-    const data = await fs.readFile(postsDataPath, "utf8");
+    const data = await fsPromises.readFile(postsDataPath, "utf8");
     const posts = data ? JSON.parse(data).posts : [];
     res.json(posts);
   } catch (error) {
@@ -96,7 +130,7 @@ app.post("/api/posts/:id/toggle-like", async (req, res) => {
   try {
     const { id } = req.params;
     const { username } = req.body; // รับ username จาก request body
-    const data = await fs.readFile(postsDataPath, "utf8");
+    const data = await fsPromises.readFile(postsDataPath, "utf8");
     const posts = JSON.parse(data).posts;
 
     const post = posts.find((p) => p.id === parseInt(id));
@@ -109,7 +143,7 @@ app.post("/api/posts/:id/toggle-like", async (req, res) => {
       // ยกเลิกการกดไลค์
       post.likes -= 1;
       post.likedBy = post.likedBy.filter((user) => user !== username);
-      await fs.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
+      await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
       return res.json({ message: "Like removed successfully", likes: post.likes });
     }
 
@@ -118,7 +152,7 @@ app.post("/api/posts/:id/toggle-like", async (req, res) => {
     post.likedBy = post.likedBy || [];
     post.likedBy.push(username);
 
-    await fs.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
+    await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
     res.json({ message: "Post liked successfully", likes: post.likes });
   } catch (error) {
     console.error("Error toggling like:", error);
@@ -133,7 +167,7 @@ app.post('/api/posts/:id/toggle-save', async (req, res) => {
     const { username } = req.body;
 
     // อ่านข้อมูล posts จากไฟล์ JSON
-    const data = await fs.readFile(postsDataPath, 'utf8');
+    const data = await fsPromises.readFile(postsDataPath, 'utf8');
     const posts = JSON.parse(data).posts;
 
     // ค้นหาโพสต์ที่ต้องการ
@@ -156,7 +190,7 @@ app.post('/api/posts/:id/toggle-save', async (req, res) => {
     }
 
     // บันทึกข้อมูลกลับไปยังไฟล์ JSON
-    await fs.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
+    await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
 
     res.json({ isSaved: post.savedBy.includes(username) });
   } catch (error) {
@@ -176,7 +210,7 @@ app.post("/api/posts/:id/comment", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const data = await fs.readFile(postsDataPath, "utf8");
+    const data = await fsPromises.readFile(postsDataPath, "utf8");
     const posts = JSON.parse(data).posts;
 
     const post = posts.find((p) => p.id === parseInt(id));
@@ -193,7 +227,7 @@ app.post("/api/posts/:id/comment", async (req, res) => {
 
     post.comments.push(newComment);
 
-    await fs.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
+    await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
     res.json({ message: "Comment added successfully", comments: post.comments });
   } catch (error) {
     console.error("Error adding comment:", error);
@@ -204,7 +238,7 @@ app.post("/api/posts/:id/comment", async (req, res) => {
 // Get all profiles
 app.get("/api/profiles", async (req, res) => {
   try {
-    const data = await fs.readFile(profileDataPath, "utf8");
+    const data = await fsPromises.readFile(profileDataPath, "utf8");
     const profiles = JSON.parse(data).profiles;
     res.json(profiles);
   } catch (error) {
@@ -217,7 +251,7 @@ app.get("/api/profiles", async (req, res) => {
 app.get("/api/profiles/:username", async (req, res) => {
   try {
     const { username } = req.params;
-    const data = await fs.readFile(path.join(__dirname, 'data', 'profileData.json'), 'utf8');
+    const data = await fsPromises.readFile(path.join(__dirname, 'data', 'profileData.json'), 'utf8');
     const { profiles } = JSON.parse(data);
     const profile = profiles.find(p => p.username === username);
     
@@ -238,7 +272,7 @@ app.put('/api/profiles/:id', async (req, res) => {
     const { fullName } = req.body;
     
     const dataPath = path.join(__dirname, 'data', 'profileData.json');
-    const data = JSON.parse(await fs.readFile(dataPath, 'utf8'));
+    const data = JSON.parse(await fsPromises.readFile(dataPath, 'utf8'));
     
     const profileIndex = data.profiles.findIndex(p => p.id === parseInt(id));
     if (profileIndex === -1) {
@@ -246,11 +280,45 @@ app.put('/api/profiles/:id', async (req, res) => {
     }
     
     data.profiles[profileIndex].fullName = fullName;
-    await fs.writeFile(dataPath, JSON.stringify(data, null, 2));
+    await fsPromises.writeFile(dataPath, JSON.stringify(data, null, 2));
     
     res.json(data.profiles[profileIndex]);
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Add avatar upload endpoint
+app.put('/api/profiles/:id/avatar', uploadAvatar.single('avatar'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const avatarPath = `/avatars/${req.file.filename}`;
+    const data = JSON.parse(await fsPromises.readFile(profileDataPath, 'utf8'));
+    
+    const profileIndex = data.profiles.findIndex(p => p.id === parseInt(id));
+    if (profileIndex === -1) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+    
+    // Remove old avatar file if it exists
+    if (data.profiles[profileIndex].avatar) {
+      const oldAvatarPath = path.join(__dirname, 'public', data.profiles[profileIndex].avatar);
+      if (fs.existsSync(oldAvatarPath)) {
+        await fsPromises.unlink(oldAvatarPath);
+      }
+    }
+    
+    data.profiles[profileIndex].avatar = avatarPath;
+    await fsPromises.writeFile(profileDataPath, JSON.stringify(data, null, 2));
+    
+    res.json(data.profiles[profileIndex]);
+  } catch (error) {
+    console.error('Error updating avatar:', error);
+    res.status(500).json({ error: 'Failed to update avatar' });
   }
 });
 
@@ -289,7 +357,7 @@ app.get('/api/tagged/:username', async (req, res) => {
 app.post("/api/register", async (req, res) => {
   try {
     const newUser = req.body;
-    const data = await fs.readFile(profileDataPath, "utf8");
+    const data = await fsPromises.readFile(profileDataPath, "utf8");
     const profiles = data ? JSON.parse(data).profiles : [];
 
     const isDuplicate = profiles.some(
@@ -315,7 +383,7 @@ app.post("/api/register", async (req, res) => {
 
     profiles.push(newProfile);
 
-    await fs.writeFile(profileDataPath, JSON.stringify({ profiles }, null, 2));
+    await fsPromises.writeFile(profileDataPath, JSON.stringify({ profiles }, null, 2));
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
     console.error("Error saving profile data:", error);
@@ -330,7 +398,7 @@ app.post("/api/login", async (req, res) => {
     const { identifier, password } = req.body; // identifier คือ username หรือ email
 
     // อ่านข้อมูลผู้ใช้จาก profileData.json
-    const data = await fs.readFile(profileDataPath, "utf8");
+    const data = await fsPromises.readFile(profileDataPath, "utf8");
     const profiles = data ? JSON.parse(data).profiles : [];
 
     // ค้นหาผู้ใช้ที่ตรงกับ username หรือ email และ password

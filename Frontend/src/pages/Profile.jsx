@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import "./Profile.css";
 
-const Profile = ({ currentUser }) => {
+const Profile = ({ currentUser, onUpdateUser }) => {
   const { username } = useParams();
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -14,6 +14,8 @@ const Profile = ({ currentUser }) => {
   const [activeTab, setActiveTab] = useState("posts"); // แท็บที่เลือก
   const [isEditingFullName, setIsEditingFullName] = useState(false);
   const [newFullName, setNewFullName] = useState("");
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef(null);
 
   const isOwnProfile = currentUser?.id === profile?.id;
 
@@ -83,6 +85,44 @@ const Profile = ({ currentUser }) => {
     }
   };
 
+  const handleAvatarUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+  
+    setIsUploadingAvatar(true);
+    const formData = new FormData();
+    formData.append('avatar', file);
+  
+    try {
+      const response = await fetch(`http://localhost:5000/api/profiles/${profile.id}/avatar`, {
+        method: 'PUT',
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to upload avatar');
+      }
+  
+      const updatedProfile = await response.json();
+      setProfile(updatedProfile);
+  
+      // อัพเดท global state และ localStorage
+      if (currentUser?.id === profile.id) {
+        const updatedUser = {
+          ...currentUser,
+          avatar: updatedProfile.avatar
+        };
+        onUpdateUser(updatedUser); // อัพเดท state ใน App component
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      alert('Failed to upload avatar. Please try again.');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -95,7 +135,34 @@ const Profile = ({ currentUser }) => {
     <div className="profile-container">
       <div className="profile-header">
         <div className="profile-avatar">
-          <img src={profile.avatar || "/placeholder.svg"} alt={profile.username} />
+          {isOwnProfile && (
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleAvatarUpload}
+              accept="image/jpeg,image/png"
+              style={{ display: 'none' }}
+            />
+          )}
+          <div 
+            className={`avatar-container ${isOwnProfile ? 'clickable' : ''}`}
+            onClick={() => isOwnProfile && fileInputRef.current?.click()}
+          >
+            <img 
+              src={profile.avatar ? `http://localhost:5000${profile.avatar}` : "/placeholder.svg"} 
+              alt={profile.username} 
+            />
+            {isOwnProfile && !isUploadingAvatar && (
+              <div className="avatar-overlay">
+                <i className="fas fa-camera"></i>
+              </div>
+            )}
+            {isUploadingAvatar && (
+              <div className="upload-overlay">
+                Uploading...
+              </div>
+            )}
+          </div>
         </div>
         <div className="profile-info">
           <div className="profile-top">

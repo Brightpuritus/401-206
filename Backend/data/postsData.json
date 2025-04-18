@@ -7,8 +7,8 @@
       "caption": "Exploring the mountains!",
       "likes": 152,
       "likedBy": [
-        "KK",
-        "purchase"
+        "purchase",
+        "KK"
       ],
       "savedBy": [
         "KK"
@@ -100,6 +100,12 @@
           "username": "Tes",
           "text": "HEEEEE",
           "timestamp": "2025-04-16T15:05:53.662Z"
+        },
+        {
+          "id": 1744898307183,
+          "username": "KK",
+          "text": "gbgb",
+          "timestamp": "2025-04-17T13:58:27.183Z"
         }
       ],
       "savedBy": [
@@ -116,7 +122,9 @@
         "KK"
       ],
       "comments": [],
-      "savedBy": []
+      "savedBy": [
+        "KK"
+      ]
     },
     {
       "id": 6,
@@ -127,7 +135,14 @@
       "likedBy": [
         "john_doe"
       ],
-      "comments": []
+      "comments": [
+        {
+          "id": 1744898300891,
+          "username": "KK",
+          "text": "eee",
+          "timestamp": "2025-04-17T13:58:20.891Z"
+        }
+      ]
     }
   ]
 }

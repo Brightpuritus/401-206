@@ -82,7 +82,10 @@ const Navbar = ({ currentUser, setCurrentUser }) => {
             )}
           </div>
           <Link to={`/profile/${currentUser.username}`} className="nav-item profile-pic">
-            <img src={currentUser.avatar || "/placeholder.svg"} alt={currentUser.username} />
+            <img 
+              src={currentUser.avatar ? `http://localhost:5000${currentUser.avatar}` : "/placeholder.svg"} 
+              alt={currentUser.username} 
+            />
           </Link>
         </div>
       </div>

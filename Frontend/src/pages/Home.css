@@ -28,6 +28,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 1;
+  width: 100%; /* เพิ่มเพื่อให้ใช้พื้นที่เต็มความกว้าง */
 }
 
 .user-info img {
@@ -35,23 +37,38 @@
   height: 56px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0; /* ป้องกันไม่ให้รูปหด */
+}
+
+.user-info .profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-grow: 1; /* ให้ส่วนของ text ขยายเต็มพื้นที่ที่เหลือ */
+  min-width: 0; /* ป้องกัน flex item จากการขยายเกินขอบเขต */
 }
 
 .username {
   font-weight: 600;
-  color: var(--black);
+  color: #262626;
+  margin: 0;
 }
 
 .name {
-  color: var(--dark-gray);
+  color: #8e8e8e;
+  margin: 0;
 }
 
 .switch-btn {
-  color: var(--yamaha-red);
+  color: #e31837;
   font-weight: 600;
   cursor: pointer;
   background: none;
   border: none;
+  margin-left: auto;
+  white-space: nowrap;
+  padding: 0 8px;
+  flex-shrink: 0; /* ป้องกันปุ่มจากการหด */
 }
 
 .suggestions {
@@ -164,3 +181,45 @@
     margin: 0 auto;
   }
 }
+
+.user-profile .profile-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.user-info .profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.username {
+  font-weight: 600;
+  color: var(--black);
+  margin: 0;
+}
+
+.name {
+  color: var(--dark-gray);
+  margin: 0;
+}
+
+.switch-btn {
+  color: var(--yamaha-red);
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  border: none;
+  margin-left: auto;
+  white-space: nowrap;
+}
+

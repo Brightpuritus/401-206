@@ -14,7 +14,7 @@ import Register from "./components/Register"
 import "./App.css"
 import "./styles/auth.css"  // ให้ import auth.css หลัง App.css
 
-function App() {
+const App = () => {
   const [currentUser, setCurrentUser] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -25,6 +25,10 @@ function App() {
     }
     setIsLoading(false)
   }, [])
+
+  const handleUpdateUser = (updatedUser) => {
+    setCurrentUser(updatedUser);
+  };
 
   // Check if current path is login or register
   const isAuthPage = window.location.pathname === '/login' || window.location.pathname === '/register';
@@ -59,7 +63,12 @@ function App() {
             />
             <Route 
               path="/profile/:username" 
-              element={currentUser ? <Profile currentUser={currentUser} /> : <Navigate to="/login" />} 
+              element={
+                <Profile 
+                  currentUser={currentUser} 
+                  onUpdateUser={handleUpdateUser}
+                />
+              } 
             />
             <Route 
               path="/messages" 

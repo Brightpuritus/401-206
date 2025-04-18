@@ -1,10 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; // เพิ่ม useEffect
 import { Link } from "react-router-dom";
 import "./Post.css";
 
 const Post = ({ post, currentUser }) => {
+  // เพิ่ม state สำหรับเก็บข้อมูล profile
+  const [postUserProfile, setPostUserProfile] = useState(null);
+  
+  // เพิ่ม useEffect เพื่อดึงข้อมูล profile
+  useEffect(() => {
+    const fetchPostUserProfile = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/profiles/${post.username}`);
+        if (response.ok) {
+          const profile = await response.json();
+          setPostUserProfile(profile);
+        }
+      } catch (error) {
+        console.error("Error fetching post user profile:", error);
+      }
+    };
+    fetchPostUserProfile();
+  }, [post.username]);
+
   const [isLiked, setIsLiked] = useState(post.likedBy?.includes(currentUser.username) || false);
   const [likesCount, setLikesCount] = useState(post.likes);
   const [isSaved, setIsSaved] = useState(post.isSavedByCurrentUser || false);
@@ -88,7 +107,11 @@ const Post = ({ post, currentUser }) => {
     <div className="post card">
       <div className="post-header">
         <Link to={`/profile/${post.username}`} className="post-user">
-          <img src={post.avatar || "/placeholder.svg"} alt={post.username} className="post-avatar" />
+          <img 
+            src={postUserProfile?.avatar ? `http://localhost:5000${postUserProfile.avatar}` : "/placeholder.svg"} 
+            alt={post.username} 
+            className="post-avatar" 
+          />
           <span className="post-username">{post.username}</span>
         </Link>
         <button className="post-more">

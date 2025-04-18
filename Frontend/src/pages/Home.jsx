@@ -55,15 +55,18 @@ const Home = ({ currentUser }) => {
       </div>
 
       <div className="sidebar">
-        <div className="user-profile card">
+        <div className="user-profile">
           <div className="user-info">
-            <img src={currentUser.avatar || "/placeholder.svg"} alt={currentUser.username} />
-            <div>
+            <img 
+              src={currentUser.avatar ? `http://localhost:5000${currentUser.avatar}` : "/placeholder.svg"} 
+              alt={currentUser.username}
+            />
+            <div className="profile-details">
               <p className="username">{currentUser.username}</p>
               <p className="name">{currentUser.fullName}</p>
             </div>
+            <button className="switch-btn">Switch</button>
           </div>
-          <button className="switch-btn">Switch</button>
         </div>
 
         <div className="suggestions card">
