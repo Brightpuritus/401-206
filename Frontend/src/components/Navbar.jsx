@@ -17,6 +17,11 @@ const Navbar = ({ currentUser, setCurrentUser }) => {
     }
   }
 
+  const handleSearchChange = (e) => {
+    const query = e.target.value
+    setSearchQuery(query)
+  }
+
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
@@ -43,7 +48,7 @@ const Navbar = ({ currentUser, setCurrentUser }) => {
             type="text"
             placeholder="Search profiles or posts..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleSearchChange}
           />
           <button type="submit" className="search-button">
             <i className="fa-solid fa-search"></i>

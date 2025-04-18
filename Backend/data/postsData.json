@@ -76,6 +76,12 @@
           "username": "Tes",
           "text": "KKKKKK",
           "timestamp": "2025-04-16T15:05:50.256Z"
+        },
+        {
+          "id": 1744986440348,
+          "username": "KK",
+          "text": "evev",
+          "timestamp": "2025-04-18T14:27:20.348Z"
         }
       ]
     },
@@ -84,8 +90,9 @@
       "username": "KK",
       "image": "/uploads/1744676773637-961745.png",
       "caption": "ttttttttt",
-      "likes": 3,
+      "likes": 4,
       "likedBy": [
+        "placeholder-person.png",
         "KK"
       ],
       "comments": [
@@ -106,34 +113,38 @@
           "username": "KK",
           "text": "gbgb",
           "timestamp": "2025-04-17T13:58:27.183Z"
+        },
+        {
+          "id": 1744986436927,
+          "username": "KK",
+          "text": "dwdwf",
+          "timestamp": "2025-04-18T14:27:16.927Z"
         }
       ],
-      "savedBy": [
-        "KK"
-      ]
+      "savedBy": []
     },
     {
       "id": 5,
       "username": "KK",
-      "image": "/uploads/1744987604933-Logo.png",
-      "caption": "Kuy",
-      "likes": 1,
+      "image": "/uploads/1744818040758-amongus2.jpg",
+      "caption": "SUS",
+      "likes": 2,
       "likedBy": [
-        "KK"
+        "KK",
+        "placeholder-person.png"
       ],
       "comments": [],
-      "savedBy": [
-        "KK"
-      ]
+      "savedBy": []
     },
     {
       "id": 6,
       "username": "john_doe",
       "image": "/uploads/1744896084568-Yamaha YZF-R7 2021 (13).jpg",
       "caption": "oh look at my new buddy",
-      "likes": 1,
+      "likes": 2,
       "likedBy": [
-        "john_doe"
+        "john_doe",
+        "KK"
       ],
       "comments": [
         {
@@ -148,7 +159,19 @@
           "text": "testt",
           "timestamp": "2025-04-18T14:26:55.302Z"
         }
-      ]
+      ],
+      "savedBy": []
+    },
+    {
+      "id": 7,
+      "username": "re123",
+      "image": "/uploads/1744981990884-Screenshot 2025-03-25 222333.png",
+      "caption": "kdc 2 end เล่นจบเเล้วไอเหี้ย",
+      "likes": 1,
+      "likedBy": [
+        "placeholder-person.png"
+      ],
+      "comments": []
     }
   ]
 }
