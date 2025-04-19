@@ -16,6 +16,7 @@ const profileDataPath = path.join(__dirname, "data", "profileData.json");
 const postsDataPath = path.join(__dirname, "data", "postsData.json");
 const userDataPath = path.join(__dirname, "data", "Userdata.json");
 const chatDataPath = path.join(__dirname, "data", "chatData.json");
+const notificationsDataPath = path.join(__dirname, "data", "notificationsData.json");
 
 // Setup multer for file uploads
 const storage = multer.diskStorage({
@@ -130,7 +131,8 @@ app.get("/api/posts", async (req, res) => {
 app.post("/api/posts/:id/toggle-like", async (req, res) => {
   try {
     const { id } = req.params;
-    const { username } = req.body; // รับ username จาก request body
+    const { username } = req.body;
+
     const data = await fsPromises.readFile(postsDataPath, "utf8");
     const posts = JSON.parse(data).posts;
 
@@ -139,22 +141,29 @@ app.post("/api/posts/:id/toggle-like", async (req, res) => {
       return res.status(404).json({ error: "Post not found" });
     }
 
-    // ตรวจสอบว่า User ได้กดไลค์แล้วหรือยัง
-    if (post.likedBy && post.likedBy.includes(username)) {
-      // ยกเลิกการกดไลค์
+    const isLiked = post.likedBy.includes(username);
+    if (isLiked) {
       post.likes -= 1;
       post.likedBy = post.likedBy.filter((user) => user !== username);
-      await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
-      return res.json({ message: "Like removed successfully", likes: post.likes });
+    } else {
+      post.likes += 1;
+      post.likedBy.push(username);
+
+      // เพิ่ม notification
+      if (post.username !== username) {
+        await addNotification({
+          id: Date.now(),
+          type: "like",
+          sender: username,
+          recipient: post.username,
+          postId: post.id,
+          timestamp: new Date().toISOString(),
+        });
+      }
     }
 
-    // เพิ่มไลค์
-    post.likes += 1;
-    post.likedBy = post.likedBy || [];
-    post.likedBy.push(username);
-
     await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
-    res.json({ message: "Post liked successfully", likes: post.likes });
+    res.json({ message: isLiked ? "Like removed successfully" : "Post liked successfully", likes: post.likes });
   } catch (error) {
     console.error("Error toggling like:", error);
     res.status(500).json({ error: "Failed to toggle like" });
@@ -286,6 +295,19 @@ app.post("/api/posts/:id/comment", async (req, res) => {
     };
 
     post.comments.push(newComment);
+
+    // เพิ่ม notification
+    if (post.username !== username) {
+      await addNotification({
+        id: Date.now(),
+        type: "comment",
+        sender: username,
+        recipient: post.username,
+        postId: post.id,
+        text,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
     res.json({ message: "Comment added successfully", comments: post.comments });
@@ -615,6 +637,34 @@ app.post("/api/profiles/:username/toggle-follow", async (req, res) => {
   } catch (error) {
     console.error("Error toggling follow:", error);
     res.status(500).json({ error: "Failed to toggle follow" });
+  }
+});
+
+// เพิ่ม notification
+const addNotification = async (notification) => {
+  const data = await fsPromises.readFile(notificationsDataPath, "utf8");
+  const notifications = data ? JSON.parse(data).notifications : [];
+  notifications.push(notification);
+  await fsPromises.writeFile(notificationsDataPath, JSON.stringify({ notifications }, null, 2));
+};
+
+// API สำหรับดึง notification ของผู้ใช้
+app.get("/api/notifications/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+    console.log("Fetching notifications for username:", username);
+
+    const data = await fsPromises.readFile(notificationsDataPath, "utf8");
+    const notifications = JSON.parse(data).notifications;
+
+    // กรองการแจ้งเตือนสำหรับผู้ใช้ที่ระบุ
+    const userNotifications = notifications.filter((n) => n.recipient === username);
+    console.log("Filtered notifications:", userNotifications);
+
+    res.json(userNotifications);
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    res.status(500).json({ error: "Failed to fetch notifications" });
   }
 });
 

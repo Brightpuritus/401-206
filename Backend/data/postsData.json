@@ -60,9 +60,10 @@
       "username": "yamaha_official",
       "image": "/uploads/post-3.jpg",
       "caption": "The new Yamaha Grand Piano.",
-      "likes": 877,
+      "likes": 878,
       "likedBy": [
-        "KK"
+        "KK",
+        "john_doe"
       ],
       "comments": [
         {
@@ -141,10 +142,11 @@
       "username": "john_doe",
       "image": "/uploads/1744896084568-Yamaha YZF-R7 2021 (13).jpg",
       "caption": "oh look at my new buddy",
-      "likes": 2,
+      "likes": 3,
       "likedBy": [
         "john_doe",
-        "KK"
+        "KK",
+        "yamaha_official"
       ],
       "comments": [
         {
@@ -158,6 +160,12 @@
           "username": "admin",
           "text": "testt",
           "timestamp": "2025-04-18T14:26:55.302Z"
+        },
+        {
+          "id": 1745076711792,
+          "username": "yamaha_official",
+          "text": "wow",
+          "timestamp": "2025-04-19T15:31:51.792Z"
         }
       ],
       "savedBy": []

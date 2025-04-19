@@ -76,7 +76,7 @@ const App = () => {
             />
             <Route 
               path="/notifications" 
-              element={currentUser ? <Notifications /> : <Navigate to="/login" />} 
+              element={currentUser ? <Notifications currentUser={currentUser} /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/create" 

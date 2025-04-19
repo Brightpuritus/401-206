@@ -4,73 +4,33 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import "./Notifications.css"
 
-const Notifications = () => {
-  const [notifications, setNotifications] = useState([])
-  const [activeTab, setActiveTab] = useState("all")
-  const [loading, setLoading] = useState(true)
+const Notifications = ({ currentUser = { username: "" } }) => {
+  const [notifications, setNotifications] = useState([]);
+  const [activeTab, setActiveTab] = useState("all");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate fetching notifications
-    setTimeout(() => {
-      setNotifications([
-        {
-          id: 1,
-          type: "like",
-          user: {
-            id: 2,
-            username: "yamaha_official",
-            avatar: "/assets/yamaha-profile.jpg",
-          },
-          content: "liked your photo",
-          postId: 101,
-          postImage: "/assets/post-1.jpg",
-          timestamp: "2023-04-10T14:30:00Z",
-          isRead: false,
-        },
-        {
-          id: 2,
-          type: "follow",
-          user: {
-            id: 3,
-            username: "yamaha_music",
-            avatar: "/assets/yamaha-music.jpg",
-          },
-          content: "started following you",
-          timestamp: "2023-04-10T10:15:00Z",
-          isRead: false,
-        },
-        {
-          id: 3,
-          type: "comment",
-          user: {
-            id: 4,
-            username: "yamaha_marine",
-            avatar: "/assets/yamaha-marine.jpg",
-          },
-          content: 'commented: "Great photo!"',
-          postId: 102,
-          postImage: "/assets/post-2.jpg",
-          timestamp: "2023-04-09T16:45:00Z",
-          isRead: true,
-        },
-        {
-          id: 4,
-          type: "mention",
-          user: {
-            id: 5,
-            username: "moto_enthusiast",
-            avatar: "/assets/user1.jpg",
-          },
-          content: "mentioned you in a comment",
-          postId: 103,
-          postImage: "/assets/post-3.jpg",
-          timestamp: "2023-04-08T09:20:00Z",
-          isRead: true,
-        },
-      ])
-      setLoading(false)
-    }, 1000)
-  }, [])
+    console.log("Current user:", currentUser);
+    if (!currentUser || !currentUser.username) {
+      console.error("currentUser is not defined or username is missing");
+      return;
+    }
+
+    const fetchNotifications = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/notifications/${currentUser.username}`);
+        const data = await response.json();
+        console.log("Fetched notifications:", data);
+        setNotifications(data);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, [currentUser]);
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp)
@@ -161,32 +121,17 @@ const Notifications = () => {
 
       <div className="notifications-list">
         {filteredNotifications.length > 0 ? (
-          filteredNotifications.map((notification) => (
-            <div
-              key={notification.id}
-              className={`notification-item ${!notification.isRead ? "unread" : ""}`}
-              onClick={() => markAsRead(notification.id)}
-            >
-              <div className="notification-avatar">
-                <img src={notification.user.avatar || "/placeholder.svg"} alt={notification.user.username} />
+          filteredNotifications.map((notification) => {
+            console.log("Rendering notification:", notification);
+            return (
+              <div key={notification.id} className="notification-item">
+                <p>
+                  <strong>{notification.sender}</strong> {notification.type === "like" ? "liked" : "commented on"} your post.
+                </p>
+                <span>{new Date(notification.timestamp).toLocaleString()}</span>
               </div>
-              <div className="notification-content">
-                <div className="notification-text">
-                  <Link to={`/profile/${notification.user.username}`} className="notification-username">
-                    {notification.user.username}
-                  </Link>{" "}
-                  {notification.content}
-                </div>
-                <div className="notification-time">{formatTime(notification.timestamp)}</div>
-              </div>
-              {notification.postImage && (
-                <div className="notification-post-image">
-                  <img src={notification.postImage || "/placeholder.svg"} alt="Post" />
-                </div>
-              )}
-              {!notification.isRead && <div className="unread-indicator"></div>}
-            </div>
-          ))
+            );
+          })
         ) : (
           <div className="no-notifications">
             <i className="fa-regular fa-bell"></i>
@@ -200,3 +145,5 @@ const Notifications = () => {
 }
 
 export default Notifications
+
+
