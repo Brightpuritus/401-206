@@ -18,6 +18,7 @@ const Profile = ({ currentUser, onUpdateUser }) => {
   const fileInputRef = useRef(null);
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
+  const [profiles, setProfiles] = useState([]);
 
   const isOwnProfile = currentUser?.id === profile?.id;
 
@@ -75,6 +76,23 @@ const Profile = ({ currentUser, onUpdateUser }) => {
   
     fetchProfileAndPosts();
   }, [username]);
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/profiles");
+        if (!response.ok) {
+          throw new Error("Failed to fetch profiles");
+        }
+        const data = await response.json();
+        setProfiles(data);
+      } catch (error) {
+        console.error("Error fetching profiles:", error);
+      }
+    };
+
+    fetchProfiles();
+  }, []);
 
   const handleEditFullName = async () => {
     try {
@@ -271,23 +289,29 @@ const Profile = ({ currentUser, onUpdateUser }) => {
   <>
     <div className="modal-overlay" onClick={handleCloseFollowersModal} />
     <div className="followers-modal">
-      <h3>Followers</h3>
-      <ul className="followers-list">
-        {profile.followers.map((follower) => (
-          <li key={follower} className="follower-item">
-            <img
-              src={`http://localhost:5000/avatars/${follower}.png`} // สมมติว่า avatar มีชื่อไฟล์ตาม username
-              alt={follower}
-              className="follower-avatar"
-            />
-            <span>{follower}</span>
-          </li>
-        ))}
-      </ul>
-      <button className="close-modal-btn" onClick={handleCloseFollowersModal}>
-        Close
-      </button>
-    </div>
+  <h3>Followers</h3>
+  <ul className="followers-list">
+  {profile.followers.map((follower) => {
+    // ค้นหาโปรไฟล์ของ follower
+    const followerProfile = profiles.find((p) => p.username === follower);
+
+    return (
+      <li key={follower} className="follower-item">
+        <img
+          src={followerProfile?.avatar ? `http://localhost:5000${followerProfile.avatar}` : "/placeholder.svg"}
+          onError={(e) => (e.target.src = "/placeholder.svg")} // ใช้ placeholder หากรูปภาพไม่พบ
+          alt={follower}
+          className="follower-avatar"
+        />
+        <span>{follower}</span>
+      </li>
+    );
+  })}
+</ul>
+  <button className="close-modal-btn" onClick={handleCloseFollowersModal}>
+    Close
+  </button>
+</div>
   </>
 )}
           <div className="profile-bio">
