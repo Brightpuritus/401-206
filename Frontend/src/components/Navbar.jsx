@@ -75,16 +75,14 @@ const Navbar = ({ currentUser, setCurrentUser }) => {
             >
               <i className="fa-solid fa-gear"></i>
             </button>
-            {showSettings && (
-              <div className="settings-dropdown">
-                <Link to={`/profile/${currentUser.username}`}>Profile</Link>
-                <Link to="/settings">Settings</Link>
-                <button onClick={toggleTheme}>
-                  {isDarkTheme ? 'Light Theme' : 'Dark Theme'}
-                </button>
-                <button onClick={handleLogout}>Logout</button>
-              </div>
-            )}
+            <div className={`settings-dropdown ${showSettings ? 'active' : ''}`}>
+              <Link to={`/profile/${currentUser.username}`}>Profile</Link>
+              <Link to="/settings">Settings</Link>
+              <button onClick={toggleTheme}>
+                {isDarkTheme ? 'Light Theme' : 'Dark Theme'}
+              </button>
+              <button onClick={handleLogout}>Logout</button>
+            </div>
           </div>
           <Link to={`/profile/${currentUser.username}`} className="nav-item profile-pic">
             <img 

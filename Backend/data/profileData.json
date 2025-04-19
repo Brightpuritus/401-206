@@ -8,7 +8,9 @@
       "password": "123",
       "avatar": "/avatars/1744903539480-320777985.png",
       "followers": [],
-      "following": [],
+      "following": [
+        "yamaha_official"
+      ],
       "bio": "Photographer & Traveler",
       "website": "www.johndoe.com"
     },
@@ -20,7 +22,8 @@
       "password": "123",
       "avatar": "/avatars/placeholder-person.jpg",
       "followers": [
-        "KK"
+        "KK",
+        "john_doe"
       ],
       "following": [],
       "bio": "Official Yamaha account. Revs your heart with motorcycles, musical instruments, and marine products.",
