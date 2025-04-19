@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cors());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/avatars", express.static(path.join(__dirname, "uploads/avatars")));
 
 // Paths to JSON files
 const profileDataPath = path.join(__dirname, "data", "profileData.json");
@@ -433,7 +434,7 @@ app.post("/api/register", async (req, res) => {
       fullName: newUser.fullname,
       email: newUser.email,
       password: newUser.password,
-      avatar: "",
+      avatar: "/avatars/placeholder-person.jpg",
       followers: [],
       following: [],
       bio: "",

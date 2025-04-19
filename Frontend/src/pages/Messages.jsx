@@ -2,10 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
-import { io } from "socket.io-client"
 import "./Messages.css"
-
-const socket = io("http://localhost:5000"); // URL ของ Backend
 
 const Messages = ({ currentUser }) => {
   const [conversations, setConversations] = useState([])
@@ -15,100 +12,40 @@ const Messages = ({ currentUser }) => {
   const messagesEndRef = useRef(null)
 
   useEffect(() => {
-    // Simulate fetching conversations
-    setTimeout(() => {
-      const mockConversations = [
-        {
-          id: 1,
-          user: {
-            id: 2,
-            username: "yamaha_official",
-            fullName: "Yamaha Official",
-            avatar: "/assets/yamaha-profile.jpg",
-            isOnline: true,
-            lastActive: null,
-          },
-          messages: [
-            {
-              id: 101,
-              sender: 2,
-              text: "Hello! Thanks for your interest in Yamaha products.",
-              timestamp: "2023-04-10T14:30:00Z",
-            },
-            {
-              id: 102,
-              sender: 1,
-              text: "Hi! I'm looking for information about the new R1M.",
-              timestamp: "2023-04-10T14:32:00Z",
-            },
-            {
-              id: 103,
-              sender: 2,
-              text: "Of course! The new R1M features advanced electronic racing technology, including GPS data logging, carbon fiber bodywork, and Öhlins Electronic Racing Suspension.",
-              timestamp: "2023-04-10T14:35:00Z",
-            },
-            {
-              id: 104,
-              sender: 1,
-              text: "That sounds amazing! What's the price range?",
-              timestamp: "2023-04-10T14:37:00Z",
-            },
-            {
-              id: 105,
-              sender: 2,
-              text: "The R1M is priced at $26,999 MSRP. Would you like me to connect you with a dealer in your area?",
-              timestamp: "2023-04-10T14:40:00Z",
-            },
-          ],
-          unreadCount: 0,
-        },
-        {
-          id: 2,
-          user: {
-            id: 3,
-            username: "yamaha_music",
-            fullName: "Yamaha Music",
-            avatar: "/assets/yamaha-music.jpg",
-            isOnline: false,
-            lastActive: "2023-04-10T10:15:00Z",
-          },
-          messages: [
-            {
-              id: 201,
-              sender: 3,
-              text: "Welcome to Yamaha Music! How can we help you today?",
-              timestamp: "2023-04-09T09:00:00Z",
-            },
-          ],
-          unreadCount: 1,
-        },
-        {
-          id: 3,
-          user: {
-            id: 4,
-            username: "yamaha_marine",
-            fullName: "Yamaha Marine",
-            avatar: "/assets/yamaha-marine.jpg",
-            isOnline: false,
-            lastActive: "2023-04-09T16:45:00Z",
-          },
-          messages: [
-            {
-              id: 301,
-              sender: 4,
-              text: "Thank you for your interest in Yamaha Marine products!",
-              timestamp: "2023-04-08T11:20:00Z",
-            },
-          ],
-          unreadCount: 1,
-        },
-      ]
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/profiles")
+        if (response.ok) {
+          const data = await response.json()
 
-      setConversations(mockConversations)
-      setActiveConversation(mockConversations[0])
-      setLoading(false)
-    }, 1000)
-  }, [])
+          // กรองข้อมูลเพื่อไม่รวม currentUser
+          const filteredProfiles = data.filter(
+            (profile) => profile.username !== currentUser.username
+          )
+
+          // ตั้งค่า conversations
+          setConversations(
+            filteredProfiles.map((profile) => ({
+              id: profile.id,
+              user: {
+                id: profile.id,
+                username: profile.username,
+                avatar: profile.avatar || "/placeholder.svg",
+                isOnline: profile.isOnline || false,
+              },
+              messages: [], // เริ่มต้นเป็นข้อความว่าง
+            }))
+          )
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchUsers()
+  }, [currentUser.username])
 
   useEffect(() => {
     // Scroll to bottom when messages change
@@ -117,26 +54,56 @@ const Messages = ({ currentUser }) => {
     }
   }, [activeConversation])
 
-  const handleSendMessage = (e) => {
-    e.preventDefault()
+  useEffect(() => {
+    if (activeConversation) {
+      fetchMessages(activeConversation.user.username);
+    }
+  }, [activeConversation]);
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
     if (message.trim() && activeConversation) {
       const newMessage = {
-        id: Date.now(),
-        sender: currentUser.id,
+        sender: currentUser.username,
+        recipient: activeConversation.user.username,
         text: message,
-        timestamp: new Date().toISOString(),
+      };
+  
+      try {
+        const response = await fetch("http://localhost:5000/api/chats", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newMessage),
+        });
+  
+        if (response.ok) {
+          const savedMessage = await response.json();
+  
+          setActiveConversation((prev) => ({
+            ...prev,
+            messages: [...prev.messages, savedMessage],
+          }));
+  
+          setConversations((prevConversations) =>
+            prevConversations.map((conv) =>
+              conv.id === activeConversation.id
+                ? {
+                    ...conv,
+                    messages: [...conv.messages, savedMessage],
+                  }
+                : conv
+            )
+          );
+  
+          setMessage("");
+        }
+      } catch (error) {
+        console.error("Error sending message:", error);
       }
-
-      const updatedConversation = {
-        ...activeConversation,
-        messages: [...activeConversation.messages, newMessage],
-      }
-
-      setActiveConversation(updatedConversation)
-      setConversations(conversations.map((conv) => (conv.id === updatedConversation.id ? updatedConversation : conv)))
-      setMessage("")
     }
-  }
+  };
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp)
@@ -212,10 +179,15 @@ const Messages = ({ currentUser }) => {
                 {conversation.user?.isOnline && <div className="online-indicator"></div>}
               </div>
               <div className="conversation-info">
-                <div className="conversation-name">{conversation.user.username}</div>
+                <div className="conversation-name">
+                  {conversation.user?.username || "Unknown User"}
+                </div>
                 <div className="conversation-last-message">
-                  {conversation.messages[conversation.messages.length - 1]?.text.substring(0, 30)}
-                  {conversation.messages[conversation.messages.length - 1]?.text.length > 30 ? "..." : ""}
+                  {conversation.messages.length > 0
+                    ? conversation.messages[
+                        conversation.messages.length - 1
+                      ]?.text.substring(0, 30)
+                    : "No messages yet"}
                 </div>
               </div>
             </div>
@@ -264,7 +236,9 @@ const Messages = ({ currentUser }) => {
               {activeConversation.messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`message ${msg.sender === currentUser.id ? "message-sent" : "message-received"}`}
+                  className={`message ${
+                    msg.sender === currentUser.username ? "message-sent" : "message-received"
+                  }`}
                 >
                   <div className="message-content">
                     <div className="message-text">{msg.text}</div>
