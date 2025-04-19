@@ -169,7 +169,7 @@
   transition: all 0.3s ease;
 }
 
-.settings-menu:hover .settings-dropdown {
+.settings-dropdown.active {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
