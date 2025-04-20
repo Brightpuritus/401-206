@@ -11,6 +11,8 @@ import CreatePost from "./pages/CreatePost"
 import Search from "./pages/Search"
 import Login from "./components/Login"
 import Register from "./components/Register"
+import AllEvents from "./pages/AllEvents"
+import EventDetails from "./pages/EventDetails"
 import "./App.css"
 import "./styles/auth.css"  // ให้ import auth.css หลัง App.css
 
@@ -85,6 +87,14 @@ const App = () => {
             <Route 
               path="/search" 
               element={currentUser ? <Search /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/events" 
+              element={currentUser ? <AllEvents /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/events/:eventId" 
+              element={currentUser ? <EventDetails /> : <Navigate to="/login" />} 
             />
           </Routes>
         </main>

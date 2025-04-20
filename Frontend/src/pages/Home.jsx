@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react"
 import Post from "../components/Post"
 import "./Home.css"
+import { useNavigate } from "react-router-dom";
 
 const Home = ({ currentUser }) => {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
-
+  const [events, setEvents] = useState([]);
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -28,6 +30,28 @@ const Home = ({ currentUser }) => {
     };
   
     fetchPosts();
+  }, []);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/events");
+        if (!response.ok) {
+          throw new Error("Failed to fetch events");
+        }
+        const data = await response.json();
+
+        // เรียงลำดับอีเว้นท์ตามวันที่ (ล่าสุดอยู่ด้านบน)
+        const sortedEvents = data.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        // เก็บเฉพาะ 3 อีเว้นท์ล่าสุด
+        setEvents(sortedEvents.slice(0, 3));
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
+
+    fetchEvents();
   }, []);
 
   if (loading) {
@@ -71,49 +95,33 @@ const Home = ({ currentUser }) => {
 
         <div className="suggestions card">
           <div className="suggestions-header">
-            <h4>Suggestions For You</h4>
-            <button>See All</button>
+            <h4>Events</h4>
+            <button onClick={() => navigate("/events")}>See All</button>
           </div>
-
-          <div className="suggestion-item">
-            <div className="user-info">
-              <img src="/assets/suggestion1.jpg" alt="User" />
-              <div>
-                <p className="username">moto_lover</p>
-                <p className="suggestion-reason">Followed by yamaha_official</p>
-              </div>
-            </div>
-            <button className="follow-btn">Follow</button>
-          </div>
-
-          <div className="suggestion-item">
-            <div className="user-info">
-              <img src="/assets/suggestion2.jpg" alt="User" />
-              <div>
-                <p className="username">music_pro</p>
-                <p className="suggestion-reason">New to Yamaha Social</p>
-              </div>
-            </div>
-            <button className="follow-btn">Follow</button>
-          </div>
-
-          <div className="suggestion-item">
-            <div className="user-info">
-              <img src="/assets/suggestion3.jpg" alt="User" />
-              <div>
-                <p className="username">boat_captain</p>
-                <p className="suggestion-reason">Followed by 3 of your friends</p>
-              </div>
-            </div>
-            <button className="follow-btn">Follow</button>
-          </div>
+          <div className="suggestion-list">
+  {events.length > 0 ? (
+    events.map((event) => (
+      <div
+        key={event.id}
+        className="suggestion-item"
+        onClick={() => navigate(`/events/${event.id}`)} // เพิ่มการนำทาง
+      >
+        <img
+          src={`http://localhost:5000${event.image}`}
+          alt={event.title}
+          className="event-image"
+        />
+        <div className="event-details">
+          <h5 className="event-title">{event.title}</h5>
+          <p className="event-description">{event.description}</p>
+          <p className="event-date">{event.date}</p>
         </div>
-
-        <div className="yamaha-ad card">user-profile card
-          <h4>Yamaha Special Offers</h4>
-          <img src="/assets/yamaha-ad.jpg" alt="Yamaha Special Offers" />
-          <p>Limited time offer on selected Yamaha products. Click to learn more!</p>
-          <button className="btn btn-primary">Learn More</button>
+      </div>
+    ))
+  ) : (
+    <p>No events available</p>
+  )}
+</div>
         </div>
 
         <div className="footer">

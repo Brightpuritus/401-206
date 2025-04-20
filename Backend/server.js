@@ -669,6 +669,38 @@ app.get("/api/notifications/:username", async (req, res) => {
   }
 });
 
+app.get("/api/events", (req, res) => {
+  const eventsPath = path.join(__dirname, "data", "events.json");
+  fs.readFile(eventsPath, "utf8", (err, data) => {
+    if (err) {
+      console.error("Error reading events data:", err);
+      res.status(500).json({ error: "Failed to fetch events" });
+    } else {
+      res.json(JSON.parse(data).events);
+    }
+  });
+});
+
+app.get("/api/events/:id", (req, res) => {
+  const eventId = parseInt(req.params.id, 10);
+  const eventsPath = path.join(__dirname, "data", "events.json");
+
+  fs.readFile(eventsPath, "utf8", (err, data) => {
+    if (err) {
+      console.error("Error reading events data:", err);
+      res.status(500).json({ error: "Failed to fetch event details" });
+    } else {
+      const events = JSON.parse(data).events;
+      const event = events.find((e) => e.id === eventId);
+      if (event) {
+        res.json(event);
+      } else {
+        res.status(404).json({ error: "Event not found" });
+      }
+    }
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
