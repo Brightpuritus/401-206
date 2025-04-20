@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Post from "../components/Post"
 import "./Home.css"
+import { Link } from 'react-router-dom';
 
 const Home = ({ currentUser }) => {
   const [posts, setPosts] = useState([])
@@ -56,17 +57,17 @@ const Home = ({ currentUser }) => {
 
       <div className="sidebar">
         <div className="user-profile">
-          <div className="user-info">
+          <Link to={`/profile/${currentUser.username}`} className="user-info">
             <img 
               src={currentUser.avatar ? `http://localhost:5000${currentUser.avatar}` : "/placeholder.svg"} 
               alt={currentUser.username}
             />
             <div className="profile-details">
-              <p className="username">{currentUser.username}</p>
               <p className="name">{currentUser.fullName}</p>
+              <p className="username">{currentUser.username}</p>
             </div>
-            <button className="switch-btn">Switch</button>
-          </div>
+          </Link>
+          <button className="switch-btn">Switch</button>
         </div>
 
         <div className="suggestions card">

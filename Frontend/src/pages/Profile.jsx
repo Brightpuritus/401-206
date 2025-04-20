@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import "./Profile.css";
 
 const Profile = ({ currentUser, onUpdateUser }) => {
@@ -19,6 +19,8 @@ const Profile = ({ currentUser, onUpdateUser }) => {
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
   const [profiles, setProfiles] = useState([]);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [showPostModal, setShowPostModal] = useState(false);
 
   const isOwnProfile = currentUser?.id === profile?.id;
 
@@ -55,12 +57,16 @@ const Profile = ({ currentUser, onUpdateUser }) => {
         }
         const allPosts = await postsResponse.json();
   
-        // Filter posts by username
-        const userPosts = allPosts.filter((post) => post.username === username);
+        // Filter posts by username and sort from newest to oldest
+        const userPosts = allPosts
+          .filter((post) => post.username === username)
+          .sort((a, b) => b.id - a.id);
         setPosts(userPosts);
   
-        // Fetch saved posts (mock data for now)
-        const savedPosts = allPosts.filter((post) => post.savedBy?.includes(username));
+        // Sort saved posts as well
+        const savedPosts = allPosts
+          .filter((post) => post.savedBy?.includes(username))
+          .sort((a, b) => b.id - a.id);
         setSavedPosts(savedPosts);
   
         // Fetch tagged posts (mock data for now)
@@ -188,6 +194,129 @@ const Profile = ({ currentUser, onUpdateUser }) => {
       alert("Failed to toggle follow. Please try again.");
     }
   };
+
+  const handlePostClick = (post) => {
+    setSelectedPost({...post}); // สร้าง copy ของ post object
+    setShowPostModal(true);
+  };
+
+  const handleClosePostModal = () => {
+    const currentPost = posts.find(p => p.id === selectedPost?.id);
+    if (currentPost) {
+      setSelectedPost({...currentPost}); // สร้าง copy ของ currentPost
+    }
+    setShowPostModal(false);
+  };
+
+  const handleLikePost = async (postId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: currentUser.username })
+      });
+  
+      if (!response.ok) throw new Error('Failed to like post');
+  
+      const updatedPost = await response.json();
+      setPosts(posts.map(post => 
+        post.id === postId ? updatedPost : post
+      ));
+      setSelectedPost(updatedPost);
+    } catch (error) {
+      console.error('Error liking post:', error);
+    }
+  };
+  
+  const handleSavePost = async (postId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}/save`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: currentUser.username })
+      });
+  
+      if (!response.ok) throw new Error('Failed to save post');
+  
+      const updatedPost = await response.json();
+      setPosts(posts.map(post => 
+        post.id === postId ? updatedPost : post
+      ));
+      setSelectedPost(updatedPost);
+    } catch (error) {
+      console.error('Error saving post:', error);
+    }
+  };
+  
+  const handleAddComment = async (postId, comment) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}/comment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          username: currentUser.username,
+          text: comment
+        })
+      });
+  
+      if (!response.ok) throw new Error('Failed to add comment');
+  
+      const updatedPost = await response.json();
+  
+      // อัพเดท posts และ selectedPost แบบ atomic
+      setPosts(prevPosts => {
+        const newPosts = prevPosts.map(post => 
+          post.id === postId ? { ...post, ...updatedPost } : post
+        );
+        return newPosts;
+      });
+  
+      setSelectedPost(prevPost => ({
+        ...prevPost,
+        ...updatedPost
+      }));
+  
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchProfilePosts = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/posts');
+        const allPosts = await response.json();
+        // กรองโพสต์ตาม username และเรียงจากใหม่ไปเก่า
+        const userPosts = allPosts
+          .filter(post => post.username === username)
+          .sort((a, b) => {
+            // เรียงตาม id จากมากไปน้อย (ใหม่ไปเก่า)
+            return b.id - a.id;
+          });
+        setPosts(userPosts);
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+      }
+    };
+
+    fetchProfilePosts();
+  }, [username]);
+
+  // เพิ่ม useEffect เพื่อติดตามการเปลี่ยนแปลงของ posts
+  useEffect(() => {
+    if (selectedPost && posts.length > 0) {
+      const updatedPost = posts.find(p => p.id === selectedPost.id);
+      if (updatedPost) {
+        setSelectedPost(updatedPost);
+      }
+    }
+  }, [posts]);
 
   if (loading) {
     return <p>Loading...</p>;
@@ -384,12 +513,22 @@ const Profile = ({ currentUser, onUpdateUser }) => {
       {activeTab === "posts" && (
   <div className="posts-grid">
     {posts.map((post) => (
-      <div key={post.id} className="post-grid-item">
+      <div 
+        key={post.id} 
+        className="post-grid-item"
+        onClick={() => handlePostClick(post)}
+      >
         <img src={`http://localhost:5000${post.image}`} alt={post.caption} />
         <div className="post-overlay">
           <div className="post-stats">
-            <span><i className="fas fa-heart"></i> {post.likes}</span>
-            <span><i className="fas fa-comment"></i> {post.comments.length}</span>
+            <div className="post-stat">
+              <i className="fas fa-heart"></i>
+              {post.likes || 0}
+            </div>
+            <div className="post-stat">
+              <i className="fas fa-comment"></i>
+              {post.comments?.length || 0}
+            </div>
           </div>
         </div>
       </div>
@@ -399,7 +538,7 @@ const Profile = ({ currentUser, onUpdateUser }) => {
         {activeTab === "saved" && (
   <div className="posts-grid">
     {savedPosts.map((post) => (
-      <div key={post.id} className="post-grid-item">
+      <div key={post.id} className="post-grid-item" onClick={() => handlePostClick(post)}>
         <img src={`http://localhost:5000${post.image}`} alt={post.caption} />
         <div className="post-overlay">
           <div className="post-stats">
@@ -414,13 +553,103 @@ const Profile = ({ currentUser, onUpdateUser }) => {
         {activeTab === "tagged" && (
           <div className="posts-grid">
             {taggedPosts.map((post) => (
-              <div key={post.id} className="post-grid-item">
+              <div key={post.id} className="post-grid-item" onClick={() => handlePostClick(post)}>
                 <img src={post.image} alt={post.caption} />
               </div>
             ))}
           </div>
         )}
       </div>
+      {showPostModal && selectedPost && (
+  <>
+    <div className="modal-overlay" onClick={handleClosePostModal} />
+    <div className="post-modal">
+      <div className="post-modal-content">
+        <div className="post-modal-left">
+          <img 
+            src={`http://localhost:5000${selectedPost.image}`} 
+            alt={selectedPost.caption} 
+          />
+        </div>
+        <div className="post-modal-right">
+          <div className="post-modal-header">
+            <Link to={`/profile/${selectedPost.username}`} className="post-user-info">
+              <img 
+                src={profile.avatar ? `http://localhost:5000${profile.avatar}` : "/placeholder.svg"} 
+                alt={profile.username}
+              />
+              <span>{profile.username}</span>
+            </Link>
+            <button className="close-modal-btn" onClick={handleClosePostModal}>
+              <i className="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div className="post-modal-comments">
+            <div className="post-caption">
+              <span className="username">{selectedPost.username}</span>
+              {selectedPost.caption}
+            </div>
+            {selectedPost.comments.map((comment) => (
+              <div key={comment.id} className="comment">
+                <span className="username">{comment.username}</span>
+                {comment.text}
+              </div>
+            ))}
+          </div>
+
+          <div className="post-modal-actions">
+            <div className="post-actions">
+              <button 
+                className="action-btn"
+                onClick={() => handleLikePost(selectedPost.id)}
+              >
+                <i className={`fas fa-heart ${selectedPost.likedBy?.includes(currentUser.username) ? 'liked' : ''}`}></i>
+              </button>
+              <button className="action-btn">
+                <i className="fas fa-comment"></i>
+              </button>
+              <button 
+                className="action-btn"
+                onClick={() => handleSavePost(selectedPost.id)}
+              >
+                <i className={`far fa-bookmark ${selectedPost.savedBy?.includes(currentUser.username) ? 'saved' : ''}`}></i>
+              </button>
+            </div>
+            <div className="likes-count">
+              {selectedPost.likes} likes
+            </div>
+          </div>
+
+          <form 
+            className="comment-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const comment = e.target.comment.value;
+              if (comment.trim()) {
+                handleAddComment(selectedPost.id, comment);
+                e.target.comment.value = '';
+              }
+            }}
+          >
+            <textarea
+              name="comment"
+              className="comment-input"
+              placeholder="Add a comment..."
+              rows="1"
+            />
+            <button 
+              type="submit" 
+              className="post-comment-btn"
+            >
+              Post
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </>
+)}
     </div>
   );
 };
