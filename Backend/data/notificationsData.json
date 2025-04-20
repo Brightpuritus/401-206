@@ -9,14 +9,6 @@
       "timestamp": "2025-04-19T14:47:58.861Z"
     },
     {
-      "id": 1745076499256,
-      "type": "like",
-      "sender": "john_doe",
-      "recipient": "yamaha_official",
-      "postId": 3,
-      "timestamp": "2025-04-19T15:28:19.256Z"
-    },
-    {
       "id": 1745076711792,
       "type": "comment",
       "sender": "yamaha_official",
@@ -24,6 +16,13 @@
       "postId": 6,
       "text": "wow",
       "timestamp": "2025-04-19T15:31:51.792Z"
+    },
+    {
+      "id": 1745160192243,
+      "type": "follow",
+      "sender": "yamaha_official",
+      "recipient": "john_doe",
+      "timestamp": "2025-04-20T14:43:12.243Z"
     }
   ]
 }

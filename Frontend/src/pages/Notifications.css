@@ -61,6 +61,7 @@
   cursor: pointer;
   transition: background-color 0.2s ease;
   position: relative;
+  border-bottom: 1px solid var(--medium-gray);
 }
 
 .notification-item:hover {
@@ -80,6 +81,7 @@
   height: 44px;
   border-radius: 50%;
   object-fit: cover;
+  margin-right: 12px;
 }
 
 .notification-content {
@@ -89,10 +91,12 @@
 
 .notification-text {
   margin-bottom: 4px;
+  font-size: 14px;
 }
 
 .notification-username {
   font-weight: 600;
+  color: var(--black);
 }
 
 .notification-time {
@@ -107,9 +111,11 @@
 }
 
 .notification-post-image img {
-  width: 100%;
-  height: 100%;
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
   object-fit: cover;
+  margin-left: 12px;
 }
 
 .unread-indicator {
