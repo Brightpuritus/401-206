@@ -18,6 +18,23 @@
       "timestamp": "2025-04-19T15:31:51.792Z"
     },
     {
+      "id": 1745150360403,
+      "type": "like",
+      "sender": "KK",
+      "recipient": "john_doe",
+      "postId": 6,
+      "timestamp": "2025-04-20T11:59:20.403Z"
+    },
+    {
+      "id": 1745151520232,
+      "type": "comment",
+      "sender": "KK",
+      "recipient": "john_doe",
+      "postId": 6,
+      "text": "ำำำำำำ",
+      "timestamp": "2025-04-20T12:18:40.232Z"
+    },
+    {
       "id": 1745160192243,
       "type": "follow",
       "sender": "yamaha_official",

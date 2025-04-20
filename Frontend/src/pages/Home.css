@@ -240,13 +240,13 @@
   gap: 4px;
 }
 
-.username {
+.name {
   font-weight: 600;
   color: var(--black);
   margin: 0;
 }
 
-.name {
+.username {
   color: var(--dark-gray);
   margin: 0;
 }
