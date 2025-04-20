@@ -124,11 +124,39 @@ const Notifications = ({ currentUser = { username: "" } }) => {
           filteredNotifications.map((notification) => {
             console.log("Rendering notification:", notification);
             return (
-              <div key={notification.id} className="notification-item">
-                <p>
-                  <strong>{notification.sender}</strong> {notification.type === "like" ? "liked" : "commented on"} your post.
-                </p>
-                <span>{new Date(notification.timestamp).toLocaleString()}</span>
+              <div
+                key={notification.id}
+                className={`notification-item ${!notification.isRead ? "unread" : ""}`}
+                onClick={() => markAsRead(notification.id)}
+              >
+                <div className="notification-avatar">
+                  <img
+                    src={`http://localhost:5000/avatars/${notification.sender}.jpg`}
+                    alt={notification.sender}
+                  />
+                </div>
+                <div className="notification-content">
+                  <p className="notification-text">
+                    <strong className="notification-username">{notification.sender}</strong>{" "}
+                    {notification.type === "like"
+                      ? "liked your post."
+                      : notification.type === "comment"
+                      ? `commented: "${notification.text}"`
+                      : notification.type === "follow"
+                      ? "started following you."
+                      : ""}
+                  </p>
+                  <span className="notification-time">{formatTime(notification.timestamp)}</span>
+                </div>
+                {notification.type === "like" || notification.type === "comment" ? (
+                  <div className="notification-post-image">
+                    <img
+                      src={`http://localhost:5000/uploads/posts/${notification.postId}.jpg`}
+                      alt="Post"
+                    />
+                  </div>
+                ) : null}
+                {!notification.isRead && <div className="unread-indicator"></div>}
               </div>
             );
           })

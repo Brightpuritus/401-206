@@ -7,7 +7,9 @@
       "email": "john_doe@gmail.com",
       "password": "123",
       "avatar": "/avatars/1744903539480-320777985.png",
-      "followers": [],
+      "followers": [
+        "yamaha_official"
+      ],
       "following": [
         "yamaha_official"
       ],
@@ -25,14 +27,16 @@
         "KK",
         "john_doe"
       ],
-      "following": [],
+      "following": [
+        "john_doe"
+      ],
       "bio": "Official Yamaha account. Revs your heart with motorcycles, musical instruments, and marine products.",
       "website": "www.yamaha.com"
     },
     {
       "id": 3,
       "username": "KK",
-      "fullName": "dqwdqwfdqfqeee",
+      "fullName": "kkkk",
       "email": "KK@gmail.com",
       "password": "123",
       "avatar": "/avatars/placeholder-person.jpg",

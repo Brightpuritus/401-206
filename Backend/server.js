@@ -625,6 +625,15 @@ app.post("/api/profiles/:username/toggle-follow", async (req, res) => {
       // Follow
       currentUserProfile.following.push(username);
       userToFollow.followers.push(currentUser);
+
+      // เพิ่ม Notification
+      await addNotification({
+        id: Date.now(),
+        type: "follow",
+        sender: currentUser,
+        recipient: username,
+        timestamp: new Date().toISOString(),
+      });
     }
 
     // Save changes

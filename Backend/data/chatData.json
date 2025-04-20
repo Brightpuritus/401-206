@@ -131,6 +131,18 @@
           "timestamp": "2025-04-19T13:44:28.199Z"
         }
       ]
+    },
+    {
+      "user1": "KK",
+      "user2": "yamaha_official",
+      "messages": [
+        {
+          "id": 1745155381526,
+          "sender": "KK",
+          "text": "-พไดไ",
+          "timestamp": "2025-04-20T13:23:01.526Z"
+        }
+      ]
     }
   ]
 }

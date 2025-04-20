@@ -16,7 +16,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+  background: #ffffff; /* เปลี่ยนจาก gradient เป็นสีขาวล้วน */
   padding: 1.5rem;
   width: 100%;
   overflow: hidden;
