@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import Post from "../components/Post"
 import "./Home.css"
+
 
 const Home = ({ currentUser }) => {
   const navigate = useNavigate();

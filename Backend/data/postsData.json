@@ -328,7 +328,14 @@
       "caption": "ไอจีไอน้อง",
       "likes": 0,
       "likedBy": [],
-      "comments": []
+      "comments": [
+        {
+          "id": 1745189500327,
+          "username": "KK",
+          "text": "Test",
+          "timestamp": "2025-04-20T22:51:40.327Z"
+        }
+      ]
     },
     {
       "id": 8,
@@ -375,6 +382,12 @@
           "username": "KK",
           "text": "ไๆดๆด",
           "timestamp": "2025-04-20T14:12:06.438Z"
+        },
+        {
+          "id": 1745189458655,
+          "username": "KK",
+          "text": "Test",
+          "timestamp": "2025-04-20T22:50:58.655Z"
         }
       ]
     }

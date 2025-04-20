@@ -34,6 +34,7 @@ const Post = ({ post, currentUser }) => {
   const [editedCaption, setEditedCaption] = useState(post.caption);
   const [editedImage, setEditedImage] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [showCommentForm, setShowCommentForm] = useState(false); // เพิ่ม state สำหรับควบคุมการแสดงฟอร์มคอมเมนต์
 
 const toggleMenu = () => {
   setShowMenu(!showMenu);
@@ -204,7 +205,10 @@ const toggleMenu = () => {
     </button>
 
     {/* ปุ่มคอมเมนต์ */}
-    <button className="post-action">
+    <button
+      className="post-action"
+        onClick={() => setShowCommentForm(!showCommentForm)} // สลับสถานะการแสดงฟอร์มคอมเมนต์
+      >
       <i className="fa-regular fa-comment"></i>
     </button>
 
@@ -269,15 +273,18 @@ const toggleMenu = () => {
   </div>
 )}
 
+           {/* ฟอร์มคอมเมนต์ */}
+      {showCommentForm && ( // แสดงฟอร์มคอมเมนต์เฉพาะเมื่อ showCommentForm เป็น true
       <form className="post-add-comment" onSubmit={handleComment}>
         <input
-          type="text"
-          placeholder="Add a comment..."
+         type="text"
+        placeholder="Add a comment..."
           value={comment}
-          onChange={(e) => setComment(e.target.value)}
+         onChange={(e) => setComment(e.target.value)}
         />
         <button type="submit">Post</button>
       </form>
+)}
     </div>
   );
 };
