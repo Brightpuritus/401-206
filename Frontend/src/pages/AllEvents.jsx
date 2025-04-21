@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // เพิ่ม useNavigate
+import { useNavigate } from "react-router-dom";
 import "./AllEvents.css";
 
-const AllEvents = () => {
+const AllEvents = ({ currentUser }) => {
   const [events, setEvents] = useState([]);
-  const navigate = useNavigate(); // ใช้สำหรับการนำทาง
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -23,17 +23,34 @@ const AllEvents = () => {
     fetchEvents();
   }, []);
 
+  const handleDelete = async (eventId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/events/${eventId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username: currentUser.username }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete event");
+      }
+
+      setEvents(events.filter((event) => event.id !== eventId));
+      console.log("Event deleted successfully");
+    } catch (error) {
+      console.error("Error deleting event:", error);
+    }
+  };
+
   return (
     <div className="all-events-container">
       <h1>All Events</h1>
       <div className="events-list">
         {events.length > 0 ? (
           events.map((event) => (
-            <div
-              key={event.id}
-              className="event-item"
-              onClick={() => navigate(`/events/${event.id}`)} // เพิ่มการนำทาง
-            >
+            <div key={event.id} className="event-item">
               <img
                 src={`http://localhost:5000${event.image}`}
                 alt={event.title}
@@ -43,8 +60,15 @@ const AllEvents = () => {
                 <h3 className="event-title">{event.title}</h3>
                 <p className="event-description">{event.description}</p>
                 <p className="event-date">Date: {event.date}</p>
-                <p className="event-location">Location: {event.location}</p>
                 <p className="event-time">Time: {event.time}</p>
+                {currentUser.role === "admin" && (
+                  <button
+                    className="delete-event-btn"
+                    onClick={() => handleDelete(event.id)}
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
             </div>
           ))

@@ -167,14 +167,13 @@
   color: var(--dark-gray);
 }
 
-.event-image {
-  width: 80px;
-  height: 60px;
-  border-radius: 8px;
+.suggestion-item .event-image {
+  width: 150px !important;
+  height: 100px !important;
   object-fit: cover;
+  border-radius: 8px;
   flex-shrink: 0;
 }
-
 .event-details {
   flex: 1;
   display: flex;
@@ -184,16 +183,17 @@
 }
 
 .event-title {
-  font-size: 14px;
-  font-weight: bold;
-  margin: 0 0 4px;
-  color: #333;
+  font-size: 14px !important;
+  font-weight: bold !important;
+  margin: 0 0 4px !important;
+  color: #333 !important;
 }
 
+
 .event-description {
-  font-size: 12px;
-  color: #666;
-  margin: 0 0 4px;
+  font-size: 10px !important;
+  color: #666 !important;
+  margin: 0 0 4px !important;
 }
 
 .event-date {

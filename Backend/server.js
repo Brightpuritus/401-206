@@ -8,6 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/avatars", express.static(path.join(__dirname, "uploads/avatars")));
@@ -708,6 +709,110 @@ app.get("/api/events/:id", (req, res) => {
       }
     }
   });
+});
+
+// Middleware สำหรับตรวจสอบ role ของ admin
+const checkAdminRole = async (req, res, next) => {
+  try {
+    const { username } = req.body; // รับ username จาก request body
+    const data = await fsPromises.readFile(profileDataPath, "utf8");
+    const profiles = JSON.parse(data).profiles;
+
+    const user = profiles.find((profile) => profile.username === username);
+    if (!user || user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied. Admins only." });
+    }
+
+    next(); // อนุญาตให้ดำเนินการต่อ
+  } catch (error) {
+    console.error("Error checking admin role:", error);
+    res.status(500).json({ error: "Failed to check admin role" });
+  }
+};
+
+// API สำหรับสร้างอีเว้นท์
+app.post("/api/events", upload.single("image"), checkAdminRole, async (req, res) => {
+  try {
+    const { title, description, date, time, location } = req.body;
+
+    if (!title || !description || !date || !time || !req.file) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const eventsPath = path.join(__dirname, "data", "events.json");
+    const data = await fsPromises.readFile(eventsPath, "utf8");
+    const events = JSON.parse(data).events;
+
+    const newEvent = {
+      id: events.length + 1,
+      title,
+      description,
+      date,
+      time,
+      location,
+      image: `/uploads/${req.file.filename}`, // เก็บ path ของไฟล์ที่อัปโหลด
+    };
+
+    events.push(newEvent);
+    await fsPromises.writeFile(eventsPath, JSON.stringify({ events }, null, 2));
+    res.status(201).json({ message: "Event created successfully", event: newEvent });
+  } catch (error) {
+    console.error("Error creating event:", error);
+    res.status(500).json({ error: "Failed to create event" });
+  }
+});
+
+app.put("/api/events/:id", checkAdminRole, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, date, time, location, image } = req.body;
+
+    const eventsPath = path.join(__dirname, "data", "events.json");
+    const data = await fsPromises.readFile(eventsPath, "utf8");
+    const events = JSON.parse(data).events;
+
+    const eventIndex = events.findIndex((event) => event.id === parseInt(id));
+    if (eventIndex === -1) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    // อัปเดตข้อมูลอีเว้นท์
+    if (title) events[eventIndex].title = title;
+    if (description) events[eventIndex].description = description;
+    if (date) events[eventIndex].date = date;
+    if (time) events[eventIndex].time = time;
+    if (location) events[eventIndex].location = location;
+    if (image) events[eventIndex].image = image;
+
+    await fsPromises.writeFile(eventsPath, JSON.stringify({ events }, null, 2));
+    res.json({ message: "Event updated successfully", event: events[eventIndex] });
+  } catch (error) {
+    console.error("Error updating event:", error);
+    res.status(500).json({ error: "Failed to update event" });
+  }
+});
+
+app.delete("/api/events/:id", checkAdminRole, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const eventsPath = path.join(__dirname, "data", "events.json");
+    const data = await fsPromises.readFile(eventsPath, "utf8");
+    const events = JSON.parse(data).events;
+
+    const eventIndex = events.findIndex((event) => event.id === parseInt(id));
+    if (eventIndex === -1) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
+    events.splice(eventIndex, 1);
+
+    await fsPromises.writeFile(eventsPath, JSON.stringify({ events }, null, 2));
+    res.json({ message: "Event deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    res.status(500).json({ error: "Failed to delete event" });
+  }
 });
 
 app.listen(PORT, () => {

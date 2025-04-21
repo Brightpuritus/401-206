@@ -6,7 +6,6 @@
       "description": "Join us for an unforgettable music experience.",
       "date": "April 30, 2025",
       "time": "6:00 PM - 10:00 PM",
-      "location": "Yamaha Hall, Bangkok",
       "image": "/uploads/yamaha-music-festival.jpg",
       "link": "https://www.yamaha.com/musicfestival2025"
     },
@@ -16,7 +15,6 @@
       "description": "Explore the latest Yamaha motorcycles and innovations.",
       "date": "May 15, 2025",
       "time": "10:00 AM - 6:00 PM",
-      "location": "Impact Arena, Nonthaburi",
       "image": "/uploads/yamaha-music-festival.jpg",
       "link": "https://www.yamaha.com/motorexpo2025"
     },
@@ -26,7 +24,6 @@
       "description": "Learn from the best guitarists in the industry.",
       "date": "June 10, 2025",
       "time": "1:00 PM - 5:00 PM",
-      "location": "Yamaha Music School, Chiang Mai",
       "image": "/uploads/yamaha-music-festival.jpg",
       "link": "https://www.yamaha.com/guitarworkshop2025"
     },
@@ -36,7 +33,6 @@
       "description": "Experience the thrill of Yamaha marine products.",
       "date": "July 20, 2025",
       "time": "9:00 AM - 4:00 PM",
-      "location": "Pattaya Beach, Chonburi",
       "image": "/uploads/yamaha-music-festival.jpg",
       "link": "https://www.yamaha.com/marineadventure2025"
     },
@@ -46,9 +42,17 @@
       "description": "Support local musicians and charities.",
       "date": "August 25, 2025",
       "time": "5:00 PM - 9:00 PM",
-      "location": "Central World, Bangkok",
       "image": "/uploads/yamaha-music-festival.jpg",
       "link": "https://www.yamaha.com/musiccharity2025"
+    },
+    {
+      "id": 6,
+      "title": "ฟหกฟหกฟหก",
+      "description": "ฟหกฟหกฟหกฟ",
+      "date": "2025-04-05",
+      "time": "18:57",
+      "location": "",
+      "image": "/uploads/1745236649771-Mo.png"
     }
   ]
 }

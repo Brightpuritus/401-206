@@ -31,7 +31,8 @@
         "john_doe"
       ],
       "bio": "Official Yamaha account. Revs your heart with motorcycles, musical instruments, and marine products.",
-      "website": "www.yamaha.com"
+      "website": "www.yamaha.com",
+      "role": "admin"
     },
     {
       "id": 3,

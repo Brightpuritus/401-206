@@ -97,6 +97,11 @@ const Home = ({ currentUser }) => {
         <div className="suggestions card">
           <div className="suggestions-header">
             <h4>Events</h4>
+            {currentUser.role === "admin" && (
+                <button onClick={() => navigate("/post-event")} className="post-event-btn">
+                  Post Event
+                </button>
+              )}
             <button onClick={() => navigate("/events")}>See All</button>
           </div>
           <div className="suggestion-list">
@@ -114,7 +119,6 @@ const Home = ({ currentUser }) => {
         />
         <div className="event-details">
           <h5 className="event-title">{event.title}</h5>
-          <p className="event-description">{event.description}</p>
           <p className="event-date">{event.date}</p>
         </div>
       </div>
