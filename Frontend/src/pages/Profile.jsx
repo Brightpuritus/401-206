@@ -202,7 +202,7 @@ const Profile = ({ currentUser, onUpdateUser }) => {
 
   const handleLikePost = async (postId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/${postId}/like`, {
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}/toggle-like`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -210,13 +210,16 @@ const Profile = ({ currentUser, onUpdateUser }) => {
         body: JSON.stringify({ username: currentUser.username }),
       });
 
-      if (!response.ok) throw new Error("Failed to like post");
+      if (!response.ok) throw new Error('Failed to like/unlike post');
 
       const updatedPost = await response.json();
       setPosts(
-        posts.map((post) => (post.id === postId ? updatedPost : post))
+        posts.map((post) => ( post.id === postId ? { ...post, likes: updatedPost.likes, likedBy: updatedPost.likedBy } : post))
       );
-      setSelectedPost(updatedPost);
+      setSelectedPost(prev => prev?.id === postId ? { ...prev, likes: updatedPost.likes, likedBy: updatedPost.likedBy } : prev);
+
+      // Refresh the page
+      window.location.reload();
     } catch (error) {
       console.error("Error liking post:", error);
     }
@@ -224,22 +227,41 @@ const Profile = ({ currentUser, onUpdateUser }) => {
 
   const handleSavePost = async (postId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/${postId}/save`, {
-        method: "POST",
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}/toggle-save`, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+            'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ username: currentUser.username }),
-      });
+        body: JSON.stringify({ username: currentUser.username })
+    });
 
-      if (!response.ok) throw new Error("Failed to save post");
+    if (!response.ok) throw new Error('Failed to save/unsave post');
 
-      const updatedPost = await response.json();
-      setPosts(
-        posts.map((post) => (post.id === postId ? updatedPost : post))
-      );
-      setSelectedPost(updatedPost);
-    } catch (error) {
+    const { isSaved } = await response.json();
+
+    // อัปเดตสถานะของโพสต์ใน state
+    setPosts(posts.map(post =>
+        post.id === postId
+            ? {
+                ...post,
+                savedBy: isSaved
+                    ? [...post.savedBy, currentUser.username]
+                    : post.savedBy.filter(user => user !== currentUser.username)
+            }
+            : post
+    ));
+
+    // อัปเดต selectedPost ถ้ากำลังดูโพสต์นี้อยู่
+    setSelectedPost(prev =>
+        prev?.id === postId
+            ? {
+                ...prev,
+                savedBy: isSaved
+                    ? [...prev.savedBy, currentUser.username]
+                    : prev.savedBy.filter(user => user !== currentUser.username)
+            }
+            : prev
+    );} catch (error) {
       console.error("Error saving post:", error);
     }
   };
