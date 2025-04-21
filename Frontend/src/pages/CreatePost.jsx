@@ -11,6 +11,7 @@ const CreatePost = ({ currentUser }) => {
   const [caption, setCaption] = useState("")
   const [location, setLocation] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [disableComments, setDisableComments] = useState(false)
   const fileInputRef = useRef(null)
   const navigate = useNavigate()
 
@@ -130,7 +131,13 @@ const CreatePost = ({ currentUser }) => {
               </div>
               <div className="post-details">
                 <div className="post-author">
-                  <img src={currentUser.avatar || "/placeholder.svg"} alt={currentUser.username} />
+                  <img 
+                    src={currentUser.avatar 
+                      ? `http://localhost:5000${currentUser.avatar}`
+                      : "http://localhost:5000/avatars/placeholder-person.jpg"
+                    } 
+                    alt={currentUser.username}
+                  />
                   <span>{currentUser.username}</span>
                 </div>
                 <textarea
@@ -150,9 +157,17 @@ const CreatePost = ({ currentUser }) => {
                     />
                   </div>
                   <div className="post-option">
-                    <label>
-                      <input type="checkbox" /> Turn off commenting
-                    </label>
+                    <div className="toggle-container">
+                      <span>Turn off commenting</span>
+                      <label className="toggle-switch">
+                        <input 
+                          type="checkbox"
+                          checked={disableComments}
+                          onChange={(e) => setDisableComments(e.target.checked)}
+                        />
+                        <span className="toggle-slider"></span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>

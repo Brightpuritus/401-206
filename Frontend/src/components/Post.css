@@ -204,27 +204,87 @@
 
 .post-more-menu {
   position: absolute;
-  top: 30px;
+  top: 40px;
   right: 0;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  z-index: 10;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 200px;
+  overflow: hidden;
+  animation: menuFadeIn 0.2s ease;
 }
 
 .post-more-menu button {
-  display: block;
   width: 100%;
-  padding: 10px;
+  padding: 16px 20px;
   background: none;
   border: none;
-  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gray-600);
 }
 
-.post-more-menu button:hover {
-  background: #f5f5f5;
+/* Edit Post button */
+.post-more-menu button:first-child {
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.post-more-menu button:first-child:hover {
+  background: var(--yamaha-red-light);
+  color: var(--yamaha-red);
+}
+
+/* Delete Post button */
+.post-more-menu button:last-child {
+  color: var(--yamaha-red);
+}
+
+.post-more-menu button:last-child:hover {
+  background: var(--yamaha-red);
+  color: var(--white);
+}
+
+/* Add backdrop when menu is open */
+.post-more-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+  z-index: 999;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.post-more-menu button:last-of-type {
+  color: red;
 }
 
 .edit-caption {
@@ -257,11 +317,79 @@
   color: #333;
 }
 
-.post-more-menu button:last-of-type {
-  color: red;
-}
-
 .edit-caption input[type="file"] {
   margin-top: 10px;
 }
-/*  */
+
+/* Edit caption modal styles */
+.edit-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--white);
+  border-radius: 12px;
+  padding: 20px;
+  animation: modalFadeIn 0.3s ease;
+}
+
+.edit-caption input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.edit-caption input:focus {
+  outline: none;
+  border-color: var(--yamaha-red);
+  box-shadow: 0 0 0 3px var(--yamaha-red-light);
+}
+
+.edit-caption-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-100);
+}
+
+.edit-caption button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0;
+}
+
+/* Save button */
+.edit-caption button:first-of-type {
+  background: var(--yamaha-red);
+  color: var(--white);
+}
+
+/* Cancel button */
+.edit-caption button:last-of-type {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

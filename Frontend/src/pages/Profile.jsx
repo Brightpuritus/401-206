@@ -357,10 +357,11 @@ const Profile = ({ currentUser, onUpdateUser }) => {
           <div className="profile-top">
             <h2 className="profile-username">{profile.username}</h2>
 
-            <button className="profile-edit-btn" onClick={() => setIsEditingFullName(true)}>
-              Edit Profile
-            </button>
-            {currentUser.username !== profile.username && (
+            {isOwnProfile ? (
+              <button className="profile-edit-btn" onClick={() => setIsEditingFullName(true)}>
+                Edit Profile
+              </button>
+            ) : (
               <button
                 className={`profile-follow-btn ${isFollowing ? "unfollow" : "follow"}`}
                 onClick={handleToggleFollow}
@@ -472,12 +473,14 @@ const Profile = ({ currentUser, onUpdateUser }) => {
         >
           <i className="fas fa-th"></i> POSTS
         </button>
-        <button
-          className={`tab-button ${activeTab === "saved" ? "active" : ""}`}
-          onClick={() => setActiveTab("saved")}
-        >
-          <i className="far fa-bookmark"></i> SAVED
-        </button>
+        {isOwnProfile && (
+          <button
+            className={`tab-button ${activeTab === "saved" ? "active" : ""}`}
+            onClick={() => setActiveTab("saved")}
+          >
+            <i className="far fa-bookmark"></i> SAVED
+          </button>
+        )}
         <button
           className={`tab-button ${activeTab === "tagged" ? "active" : ""}`}
           onClick={() => setActiveTab("tagged")}

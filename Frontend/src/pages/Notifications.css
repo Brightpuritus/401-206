@@ -1,23 +1,35 @@
+:root {
+  --yamaha-red: #e31837;
+  --yamaha-red-light: rgba(227, 24, 55, 0.08);
+  --white: #ffffff;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #eeeeee;
+  --gray-600: #666666;
+}
+
 .notifications-container {
   max-width: 600px;
-  margin: 0 auto;
+  margin: 40px auto;
   background-color: var(--white);
-  border: 1px solid var(--medium-gray);
-  border-radius: 4px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   overflow: hidden;
+  animation: fadeIn 0.3s ease;
 }
 
 .notifications-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid var(--medium-gray);
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--gray-100);
 }
 
 .notifications-header h2 {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
+  color: var(--yamaha-red);
 }
 
 .mark-read-btn {
@@ -26,27 +38,45 @@
   cursor: pointer;
   background: none;
   border: none;
+  transition: all 0.2s ease;
+}
+
+.mark-read-btn:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
 }
 
 .notifications-tabs {
   display: flex;
-  border-bottom: 1px solid var(--medium-gray);
-  overflow-x: auto;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--gray-100);
+  gap: 24px;
 }
 
 .notification-tab {
-  padding: 12px 16px;
+  padding: 16px 8px;
   font-weight: 600;
-  color: var(--dark-gray);
+  color: var(--gray-600);
   cursor: pointer;
   background: none;
   border: none;
-  white-space: nowrap;
+  position: relative;
+  transition: all 0.2s ease;
 }
 
 .notification-tab.active {
-  color: var(--black);
-  border-bottom: 2px solid var(--yamaha-red);
+  color: var(--yamaha-red);
+}
+
+.notification-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--yamaha-red);
+  animation: slideIn 0.3s ease;
 }
 
 .notifications-list {
@@ -57,19 +87,20 @@
 .notification-item {
   display: flex;
   align-items: center;
-  padding: 16px;
+  padding: 16px 24px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
   position: relative;
-  border-bottom: 1px solid var(--medium-gray);
+  border-bottom: 1px solid var(--gray-100);
+  animation: slideUp 0.3s ease;
 }
 
 .notification-item:hover {
-  background-color: var(--light-gray);
+  background-color: var(--gray-50);
 }
 
 .notification-item.unread {
-  background-color: rgba(230, 0, 18, 0.05);
+  background-color: var(--yamaha-red-light);
 }
 
 .notification-avatar {
@@ -77,11 +108,18 @@
 }
 
 .notification-avatar img {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 12px;
+  margin-right: 16px;
+  border: 2px solid var(--white);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.notification-avatar img:hover {
+  transform: scale(1.05);
 }
 
 .notification-content {
@@ -92,16 +130,17 @@
 .notification-text {
   margin-bottom: 4px;
   font-size: 14px;
+  line-height: 1.5;
 }
 
 .notification-username {
   font-weight: 600;
-  color: var(--black);
+  color: var(--yamaha-red);
 }
 
 .notification-time {
   font-size: 12px;
-  color: var(--dark-gray);
+  color: var(--gray-600);
 }
 
 .notification-post-image {
@@ -111,22 +150,27 @@
 }
 
 .notification-post-image img {
-  width: 44px;
-  height: 44px;
-  border-radius: 4px;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
   object-fit: cover;
-  margin-left: 12px;
+  transition: all 0.2s ease;
+}
+
+.notification-post-image img:hover {
+  transform: scale(1.05);
 }
 
 .unread-indicator {
-  position: absolute;
-  left: 4px;
-  top: 50%;
-  transform: translateY(-50%);
   width: 8px;
   height: 8px;
   background-color: var(--yamaha-red);
   border-radius: 50%;
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  animation: pulse 2s infinite;
 }
 
 .no-notifications {
@@ -134,13 +178,15 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 0;
-  color: var(--dark-gray);
+  padding: 60px 24px;
   text-align: center;
+  color: var(--gray-600);
+  animation: fadeIn 0.3s ease;
 }
 
 .no-notifications i {
   font-size: 48px;
+  color: var(--yamaha-red);
   margin-bottom: 16px;
 }
 
@@ -149,9 +195,55 @@
   margin-bottom: 8px;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateY(-50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-50%) scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
 @media (max-width: 480px) {
   .notifications-container {
-    border: none;
+    margin: 0;
     border-radius: 0;
   }
 }

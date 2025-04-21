@@ -91,13 +91,13 @@ const Home = ({ currentUser }) => {
               <p className="username">{currentUser.username}</p>
             </div>
           </Link>
-          <button className="switch-btn">Switch</button>
+          {/* Remove the Switch button */}
         </div>
 
         <div className="suggestions card">
           <div className="suggestions-header">
             <h4>Events</h4>
-            {currentUser.role === "admin" && (
+            {currentUser.username === "admin" && (
                 <button onClick={() => navigate("/post-event")} className="post-event-btn">
                   Post Event
                 </button>

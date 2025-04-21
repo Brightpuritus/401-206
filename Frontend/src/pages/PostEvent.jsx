@@ -15,7 +15,7 @@ const PostEvent = ({ currentUser }) => {
   const [error, setError] = useState("");
 
   // ตรวจสอบ role ของผู้ใช้
-  if (currentUser.role !== "admin") {
+  if (currentUser.username !== "admin") {
     return <p>Access denied. Only admins can post events.</p>;
   }
 

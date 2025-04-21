@@ -1,44 +1,172 @@
+:root {
+  --yamaha-red: #e31837;
+  --yamaha-red-light: rgba(227, 24, 55, 0.08);
+  --white: #ffffff;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #eeeeee;
+  --gray-600: #666666;
+}
+
 .post-event-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 40px;
+  background: var(--white);
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  animation: slideUp 0.4s ease;
+}
+
+.post-event-container h1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--yamaha-red);
+  text-align: center;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.post-event-container h1::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: var(--yamaha-red);
+  border-radius: 2px;
+}
+
+.post-event-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--gray-600);
+  transition: color 0.2s ease;
+}
+
+.form-group:focus-within label {
+  color: var(--yamaha-red);
+}
+
+.post-event-form input,
+.post-event-form textarea {
+  padding: 14px 18px;
+  border: 2px solid var(--gray-200);
+  border-radius: 12px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  background: var(--gray-50);
+}
+
+.post-event-form input:hover,
+.post-event-form textarea:hover {
+  border-color: var(--gray-600);
+}
+
+.post-event-form input:focus,
+.post-event-form textarea:focus {
+  outline: none;
+  border-color: var(--yamaha-red);
+  background: var(--white);
+  box-shadow: 0 0 0 4px var(--yamaha-red-light);
+}
+
+.post-event-form textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.upload-area {
+  padding: 48px;
+  border: 2px dashed var(--gray-200);
+  border-radius: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--gray-50);
+}
+
+.upload-area:hover {
+  border-color: var(--yamaha-red);
+  background: var(--yamaha-red-light);
+  transform: translateY(-2px);
+}
+
+.upload-area i {
+  font-size: 36px;
+  color: var(--yamaha-red);
+  margin-bottom: 12px;
+  transition: transform 0.3s ease;
+}
+
+.upload-area:hover i {
+  transform: scale(1.1);
+}
+
+.post-event-form button {
+  padding: 16px;
+  background: var(--yamaha-red);
+  color: var(--white);
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.post-event-form button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: translateX(-100%);
+}
+
+.post-event-form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(227, 24, 55, 0.25);
+}
+
+.post-event-form button:hover::after {
+  transform: translateX(100%);
+  transition: transform 0.6s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
   }
-  
-  .post-event-container h1 {
-    text-align: center;
-    margin-bottom: 20px;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  .post-event-form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .post-event-container {
+    margin: 20px;
+    padding: 30px 24px;
   }
-  
-  .post-event-form input,
-  .post-event-form textarea,
-  .post-event-form button {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  .post-event-form button {
-    background: #007bff;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .post-event-form button:hover {
-    background: #0056b3;
-  }
-  
-  .error {
-    color: red;
-    text-align: center;
-    margin-bottom: 10px;
-  }
+}
