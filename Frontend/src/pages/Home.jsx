@@ -97,7 +97,7 @@ const Home = ({ currentUser }) => {
         <div className="suggestions card">
           <div className="suggestions-header">
             <h4>Events</h4>
-            {currentUser.role === "admin" && (
+            {currentUser?.username === "admin" && (
                 <button onClick={() => navigate("/post-event")} className="post-event-btn">
                   Post Event
                 </button>

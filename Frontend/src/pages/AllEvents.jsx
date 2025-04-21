@@ -106,7 +106,7 @@ const AllEvents = ({ currentUser }) => {
                 <p className="event-description">{event.description}</p>
                 <p className="event-date">Date: {event.date}</p>
                 <p className="event-time">Time: {event.time}</p>
-                {currentUser.role === "admin" && (
+                {currentUser?.username === "admin" && (
                   <div className="admin-actions">
                     <button
                       className="edit-event-btn"

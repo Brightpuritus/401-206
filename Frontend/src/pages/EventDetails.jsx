@@ -85,16 +85,16 @@ const EventDetails = ({ currentUser }) => {
 
   return (
     <div className="event-details-container">
-      {currentUser && currentUser.role === "admin" && (
-        <div className="admin-actions">
-          <button className="edit-event-btn" onClick={handleEdit}>
-            Edit
-          </button>
-          <button className="delete-event-btn" onClick={handleDelete}>
-            Delete
-          </button>
-        </div>
-      )}
+      {currentUser?.username === "admin" && (
+  <div className="admin-actions">
+    <button className="edit-event-btn" onClick={handleEdit}>
+      Edit
+    </button>
+    <button className="delete-event-btn" onClick={handleDelete}>
+      Delete
+    </button>
+  </div>
+)}
       <img
         src={`http://localhost:5000${event.image}`}
         alt={event.title}
