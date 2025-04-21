@@ -5,7 +5,7 @@ import "../styles/auth.css";
 function Register() {
   const [formData, setFormData] = useState({
     username: "",
-    fullname: "",
+    fullName: "",
     email: "",
     password: "",
   });
@@ -20,7 +20,12 @@ function Register() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          username: formData.username,
+          fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+        }),
       });
 
       if (response.ok) {
@@ -56,8 +61,8 @@ function Register() {
               type="text"
               className="form-input"
               placeholder="Fullname"
-              value={formData.fullname}
-              onChange={(e) => setFormData({ ...formData, fullname: e.target.value })}
+              value={formData.fullName}
+              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
               required
             />
           </div>

@@ -6,6 +6,7 @@ const cors = require("cors");
 const multer = require("multer");
 const app = express();
 const PORT = process.env.PORT || 5000;
+const pool = require('./db');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -87,33 +88,16 @@ app.post("/api/posts", upload.single("image"), async (req, res) => {
   try {
     const { username, caption } = req.body;
     const image = req.file;
-
     if (!username || !caption || !image) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-
-    const data = await fsPromises.readFile(postsDataPath, "utf8");
-    const posts = data ? JSON.parse(data).posts : [];
-
-    const newPost = {
-      id: posts.length + 1,
-      username,
-      image: `/uploads/${image.filename}`,
-      caption,
-      likes: 0,
-      likedBy: [],
-      comments: [],
-    };
-
-    posts.push(newPost);
-
-    await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
-    res.status(201).json({ message: "Post created successfully", post: newPost });
+    const [result] = await pool.query(
+      "INSERT INTO posts (username, image, caption, likes) VALUES (?, ?, ?, 0)",
+      [username, `/uploads/${image.filename}`, caption]
+    );
+    const [rows] = await pool.query("SELECT * FROM posts WHERE id=?", [result.insertId]);
+    res.status(201).json({ message: "Post created successfully", post: rows[0] });
   } catch (error) {
-    if (error.message === "Only .png and .jpg files are allowed") {
-      return res.status(400).json({ error: error.message });
-    }
-    console.error("Unexpected error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -121,11 +105,18 @@ app.post("/api/posts", upload.single("image"), async (req, res) => {
 // Get all posts
 app.get("/api/posts", async (req, res) => {
   try {
-    const data = await fsPromises.readFile(postsDataPath, "utf8");
-    const posts = data ? JSON.parse(data).posts : [];
+    const [posts] = await pool.query("SELECT * FROM posts ORDER BY id DESC");
+    for (const post of posts) {
+      // ดึง likedBy, savedBy, comments
+      const [likedBy] = await pool.query("SELECT username FROM post_likes WHERE post_id=?", [post.id]);
+      const [savedBy] = await pool.query("SELECT username FROM post_saves WHERE post_id=?", [post.id]);
+      const [comments] = await pool.query("SELECT * FROM post_comments WHERE post_id=? ORDER BY timestamp ASC", [post.id]);
+      post.likedBy = likedBy.map(l => l.username);
+      post.savedBy = savedBy.map(s => s.username);
+      post.comments = comments;
+    }
     res.json(posts);
   } catch (error) {
-    console.error("Error reading posts data:", error);
     res.status(500).json({ error: "Failed to read posts data" });
   }
 });
@@ -136,24 +127,19 @@ app.post("/api/posts/:id/toggle-like", async (req, res) => {
   try {
     const { id } = req.params;
     const { username } = req.body;
+    const [postRows] = await pool.query("SELECT * FROM posts WHERE id=?", [id]);
+    const post = postRows[0];
+    if (!post) return res.status(404).json({ error: "Post not found" });
 
-    const data = await fsPromises.readFile(postsDataPath, "utf8");
-    const posts = JSON.parse(data).posts;
-
-    const post = posts.find((p) => p.id === parseInt(id));
-    if (!post) {
-      return res.status(404).json({ error: "Post not found" });
-    }
-
-    const isLiked = post.likedBy.includes(username);
-    if (isLiked) {
-      post.likes -= 1;
-      post.likedBy = post.likedBy.filter((user) => user !== username);
+    const [liked] = await pool.query("SELECT * FROM post_likes WHERE post_id=? AND username=?", [id, username]);
+    if (liked.length > 0) {
+      await pool.query("DELETE FROM post_likes WHERE post_id=? AND username=?", [id, username]);
+      await pool.query("UPDATE posts SET likes = likes - 1 WHERE id=?", [id]);
+      res.json({ message: "Like removed successfully" });
     } else {
-      post.likes += 1;
-      post.likedBy.push(username);
-
-      // เพิ่ม notification
+      await pool.query("INSERT INTO post_likes (post_id, username) VALUES (?, ?)", [id, username]);
+      await pool.query("UPDATE posts SET likes = likes + 1 WHERE id=?", [id]);
+      // เพิ่ม notification เฉพาะถ้า like คนอื่น
       if (post.username !== username) {
         await addNotification({
           id: Date.now(),
@@ -161,15 +147,13 @@ app.post("/api/posts/:id/toggle-like", async (req, res) => {
           sender: username,
           recipient: post.username,
           postId: post.id,
-          timestamp: new Date().toISOString(),
+          text: null,
+          timestamp: new Date(),
         });
       }
+      res.json({ message: "Post liked successfully" });
     }
-
-    await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
-    res.json({ message: isLiked ? "Like removed successfully" : "Post liked successfully", likes: post.likes });
   } catch (error) {
-    console.error("Error toggling like:", error);
     res.status(500).json({ error: "Failed to toggle like" });
   }
 });
@@ -179,33 +163,18 @@ app.put("/api/posts/:id", upload.single("image"), async (req, res) => {
   try {
     const { id } = req.params;
     const { caption } = req.body;
-
-    const data = await fsPromises.readFile(postsDataPath, "utf8");
-    const posts = JSON.parse(data).posts;
-
-    const postIndex = posts.findIndex((p) => p.id === parseInt(id));
-    if (postIndex === -1) {
-      return res.status(404).json({ error: "Post not found" });
-    }
-
-    // ลบรูปภาพเก่าออกจากระบบไฟล์ ถ้ามีการอัปโหลดรูปภาพใหม่
+    let updateSql = "UPDATE posts SET caption=?";
+    let params = [caption];
     if (req.file) {
-      const oldImagePath = path.join(__dirname, posts[postIndex].image);
-      if (fs.existsSync(oldImagePath)) {
-        fs.unlinkSync(oldImagePath); // ลบไฟล์เก่า
-      }
-      posts[postIndex].image = `/uploads/${req.file.filename}`; // อัปเดตรูปภาพใหม่
+      updateSql += ", image=?";
+      params.push(`/uploads/${req.file.filename}`);
     }
-
-    // อัปเดต caption ถ้ามี
-    if (caption) {
-      posts[postIndex].caption = caption;
-    }
-
-    await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
-    res.json({ message: "Post updated successfully", post: posts[postIndex] });
+    updateSql += " WHERE id=?";
+    params.push(id);
+    await pool.query(updateSql, params);
+    const [rows] = await pool.query("SELECT * FROM posts WHERE id=?", [id]);
+    res.json({ message: "Post updated successfully", post: rows[0] });
   } catch (error) {
-    console.error("Error updating post:", error);
     res.status(500).json({ error: "Failed to update post" });
   }
 });
@@ -214,21 +183,9 @@ app.put("/api/posts/:id", upload.single("image"), async (req, res) => {
 app.delete("/api/posts/:id", async (req, res) => {
   try {
     const { id } = req.params;
-
-    const data = await fsPromises.readFile(postsDataPath, "utf8");
-    const posts = JSON.parse(data).posts;
-
-    const postIndex = posts.findIndex((p) => p.id === parseInt(id));
-    if (postIndex === -1) {
-      return res.status(404).json({ error: "Post not found" });
-    }
-
-    posts.splice(postIndex, 1); // ลบโพสต์ออกจากอาร์เรย์
-
-    await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
+    await pool.query("DELETE FROM posts WHERE id=?", [id]);
     res.json({ message: "Post deleted successfully" });
   } catch (error) {
-    console.error("Error deleting post:", error);
     res.status(500).json({ error: "Failed to delete post" });
   }
 });
@@ -238,36 +195,15 @@ app.post('/api/posts/:id/toggle-save', async (req, res) => {
   try {
     const { id } = req.params;
     const { username } = req.body;
-
-    // อ่านข้อมูล posts จากไฟล์ JSON
-    const data = await fsPromises.readFile(postsDataPath, 'utf8');
-    const posts = JSON.parse(data).posts;
-
-    // ค้นหาโพสต์ที่ต้องการ
-    const post = posts.find((p) => p.id === parseInt(id));
-    if (!post) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
-
-    // ตรวจสอบและอัปเดต savedBy
-    if (!post.savedBy) {
-      post.savedBy = [];
-    }
-
-    if (post.savedBy.includes(username)) {
-      // ลบ username ออกจาก savedBy
-      post.savedBy = post.savedBy.filter((user) => user !== username);
+    const [saved] = await pool.query("SELECT * FROM post_saves WHERE post_id=? AND username=?", [id, username]);
+    if (saved.length > 0) {
+      await pool.query("DELETE FROM post_saves WHERE post_id=? AND username=?", [id, username]);
+      res.json({ isSaved: false });
     } else {
-      // เพิ่ม username เข้าไปใน savedBy
-      post.savedBy.push(username);
+      await pool.query("INSERT INTO post_saves (post_id, username) VALUES (?, ?)", [id, username]);
+      res.json({ isSaved: true });
     }
-
-    // บันทึกข้อมูลกลับไปยังไฟล์ JSON
-    await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
-
-    res.json({ isSaved: post.savedBy.includes(username) });
   } catch (error) {
-    console.error('Error toggling save:', error);
     res.status(500).json({ error: 'Failed to toggle save' });
   }
 });
@@ -283,24 +219,17 @@ app.post("/api/posts/:id/comment", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const data = await fsPromises.readFile(postsDataPath, "utf8");
-    const posts = JSON.parse(data).posts;
+    const [postRows] = await pool.query("SELECT * FROM posts WHERE id=?", [id]);
+    const post = postRows[0];
+    if (!post) return res.status(404).json({ error: "Post not found" });
 
-    const post = posts.find((p) => p.id === parseInt(id));
-    if (!post) {
-      return res.status(404).json({ error: "Post not found" });
-    }
+    const commentId = Date.now();
+    await pool.query(
+      "INSERT INTO post_comments (id, post_id, username, text, timestamp) VALUES (?, ?, ?, ?, ?)",
+      [commentId, id, username, text, new Date()]
+    );
 
-    const newComment = {
-      id: Date.now(),
-      username,
-      text,
-      timestamp: new Date().toISOString(),
-    };
-
-    post.comments.push(newComment);
-
-    // เพิ่ม notification
+    // เพิ่ม notification เฉพาะถ้า comment คนอื่น
     if (post.username !== username) {
       await addNotification({
         id: Date.now(),
@@ -309,14 +238,14 @@ app.post("/api/posts/:id/comment", async (req, res) => {
         recipient: post.username,
         postId: post.id,
         text,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date(),
       });
     }
 
-    await fsPromises.writeFile(postsDataPath, JSON.stringify({ posts }, null, 2));
-    res.json({ message: "Comment added successfully", comments: post.comments });
+    // ดึงคอมเมนต์ล่าสุดทั้งหมด
+    const [comments] = await pool.query("SELECT * FROM post_comments WHERE post_id=? ORDER BY timestamp ASC", [id]);
+    res.json({ message: "Comment added successfully", comments });
   } catch (error) {
-    console.error("Error adding comment:", error);
     res.status(500).json({ error: "Failed to add comment" });
   }
 });
@@ -328,11 +257,9 @@ app.post("/api/posts/:id/comment", async (req, res) => {
 // Get all profiles
 app.get("/api/profiles", async (req, res) => {
   try {
-    const data = await fsPromises.readFile(profileDataPath, "utf8");
-    const profiles = JSON.parse(data).profiles;
-    res.json(profiles);
+    const [rows] = await pool.query("SELECT * FROM profiles");
+    res.json(rows);
   } catch (error) {
-    console.error("Error reading profiles data:", error);
     res.status(500).json({ error: "Failed to read profiles data" });
   }
 });
@@ -341,38 +268,26 @@ app.get("/api/profiles", async (req, res) => {
 app.get("/api/profiles/:username", async (req, res) => {
   try {
     const { username } = req.params;
-    const data = await fsPromises.readFile(path.join(__dirname, 'data', 'profileData.json'), 'utf8');
-    const { profiles } = JSON.parse(data);
-    const profile = profiles.find(p => p.username === username);
-    
-    if (!profile) {
-      return res.status(404).json({ error: 'Profile not found' });
-    }
-    
-    res.json(profile);
+    const [rows] = await pool.query("SELECT * FROM profiles WHERE username = ?", [username]);
+    if (rows.length === 0) return res.status(404).json({ error: 'Profile not found' });
+    res.json(rows[0]);
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
 });
 
+
 // Update a profile
 app.put('/api/profiles/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { fullName } = req.body;
-    
-    const dataPath = path.join(__dirname, 'data', 'profileData.json');
-    const data = JSON.parse(await fsPromises.readFile(dataPath, 'utf8'));
-    
-    const profileIndex = data.profiles.findIndex(p => p.id === parseInt(id));
-    if (profileIndex === -1) {
-      return res.status(404).json({ error: 'Profile not found' });
-    }
-    
-    data.profiles[profileIndex].fullName = fullName;
-    await fsPromises.writeFile(dataPath, JSON.stringify(data, null, 2));
-    
-    res.json(data.profiles[profileIndex]);
+    const { fullName, bio, website } = req.body;
+    await pool.query(
+      "UPDATE profiles SET fullName=?, bio=?, website=? WHERE id=?",
+      [fullName, bio, website, id]
+    );
+    const [rows] = await pool.query("SELECT * FROM profiles WHERE id=?", [id]);
+    res.json(rows[0]);
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
@@ -382,32 +297,12 @@ app.put('/api/profiles/:id', async (req, res) => {
 app.put('/api/profiles/:id/avatar', uploadAvatar.single('avatar'), async (req, res) => {
   try {
     const { id } = req.params;
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
-
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     const avatarPath = `/avatars/${req.file.filename}`;
-    const data = JSON.parse(await fsPromises.readFile(profileDataPath, 'utf8'));
-    
-    const profileIndex = data.profiles.findIndex(p => p.id === parseInt(id));
-    if (profileIndex === -1) {
-      return res.status(404).json({ error: 'Profile not found' });
-    }
-    
-    // Remove old avatar file if it exists
-    if (data.profiles[profileIndex].avatar) {
-      const oldAvatarPath = path.join(__dirname, 'public', data.profiles[profileIndex].avatar);
-      if (fs.existsSync(oldAvatarPath)) {
-        await fsPromises.unlink(oldAvatarPath);
-      }
-    }
-    
-    data.profiles[profileIndex].avatar = avatarPath;
-    await fsPromises.writeFile(profileDataPath, JSON.stringify(data, null, 2));
-    
-    res.json(data.profiles[profileIndex]);
+    await pool.query("UPDATE profiles SET avatar=? WHERE id=?", [avatarPath, id]);
+    const [rows] = await pool.query("SELECT * FROM profiles WHERE id=?", [id]);
+    res.json(rows[0]);
   } catch (error) {
-    console.error('Error updating avatar:', error);
     res.status(500).json({ error: 'Failed to update avatar' });
   }
 });
@@ -449,68 +344,34 @@ app.get('/api/tagged/:username', async (req, res) => {
 // API สำหรับบันทึกข้อมูลผู้ใช้
 app.post("/api/register", async (req, res) => {
   try {
-    const newUser = req.body;
-    const data = await fsPromises.readFile(profileDataPath, "utf8");
-    const profiles = data ? JSON.parse(data).profiles : [];
-
-    const isDuplicate = profiles.some(
-      (profile) => profile.username === newUser.username || profile.email === newUser.email
+    const { username, fullName, email, password } = req.body;
+    const [dup] = await pool.query("SELECT * FROM profiles WHERE username=? OR email=?", [username, email]);
+    if (dup.length > 0) return res.status(400).json({ error: "Username or email already exists" });
+    await pool.query(
+      "INSERT INTO profiles (username, fullName, email, password, avatar, bio, website) VALUES (?, ?, ?, ?, ?, '', '')",
+      [username, fullName, email, password, "/avatars/placeholder-person.jpg"]
     );
-
-    if (isDuplicate) {
-      return res.status(400).json({ error: "Username or email already exists" });
-    }
-
-    const newProfile = {
-      id: profiles.length + 1,
-      username: newUser.username,
-      fullName: newUser.fullname,
-      email: newUser.email,
-      password: newUser.password,
-      avatar: "/avatars/placeholder-person.jpg",
-      followers: [],
-      following: [],
-      bio: "",
-      website: "",
-    };
-
-    profiles.push(newProfile);
-
-    await fsPromises.writeFile(profileDataPath, JSON.stringify({ profiles }, null, 2));
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    console.error("Error saving profile data:", error);
+    console.error(error); // เพิ่มบรรทัดนี้เพื่อดู error จริง
     res.status(500).json({ error: "Failed to save profile data" });
   }
 });
 
-// API สำหรับตรวจสอบข้อมูลการเข้าสู่ระบบ
+
 // API สำหรับตรวจสอบข้อมูลการเข้าสู่ระบบ
 app.post("/api/login", async (req, res) => {
   try {
-    const { identifier, password } = req.body; // identifier คือ username หรือ email
-
-    // อ่านข้อมูลผู้ใช้จาก profileData.json
-    const data = await fsPromises.readFile(profileDataPath, "utf8");
-    const profiles = data ? JSON.parse(data).profiles : [];
-
-    // ค้นหาผู้ใช้ที่ตรงกับ username หรือ email และ password
-    const user = profiles.find(
-      (profile) =>
-        (profile.username.toLowerCase() === identifier.toLowerCase() || // ตรวจสอบ username แบบ case-insensitive
-         profile.email.toLowerCase() === identifier.toLowerCase()) &&
-        profile.password === password
+    const { identifier, password } = req.body;
+    const [rows] = await pool.query(
+      "SELECT * FROM profiles WHERE (LOWER(username)=? OR LOWER(email)=?) AND password=?",
+      [identifier.toLowerCase(), identifier.toLowerCase(), password]
     );
-
-    if (!user) {
-      return res.status(401).json({ error: "Invalid username/email or password" });
-    }
-
-    // ส่งข้อมูลผู้ใช้กลับไป (ไม่ควรส่ง password)
-    const { password: _, ...userWithoutPassword } = user;
-    res.status(200).json({ message: "Login successful", user: userWithoutPassword });
+    if (rows.length === 0) return res.status(401).json({ error: "Invalid username/email or password" });
+    const user = rows[0];
+    delete user.password;
+    res.status(200).json({ message: "Login successful", user });
   } catch (error) {
-    console.error("Error reading profile data:", error);
     res.status(500).json({ error: "Failed to read profile data" });
   }
 });
@@ -610,81 +471,93 @@ app.post("/api/profiles/:username/toggle-follow", async (req, res) => {
   try {
     const { username } = req.params;
     const { currentUser } = req.body;
+    // ดึง id ของทั้งสอง user
+    const [[toFollow]] = await pool.query("SELECT id FROM profiles WHERE username=?", [username]);
+    const [[me]] = await pool.query("SELECT id FROM profiles WHERE username=?", [currentUser]);
+    if (!toFollow || !me) return res.status(404).json({ error: "User not found" });
 
-    if (!currentUser) {
-      return res.status(400).json({ error: "Current user is required" });
-    }
-
-    const data = JSON.parse(await fsPromises.readFile(profileDataPath, "utf8"));
-    const profiles = data.profiles;
-
-    const userToFollow = profiles.find((profile) => profile.username === username);
-    const currentUserProfile = profiles.find((profile) => profile.username === currentUser);
-
-    if (!userToFollow || !currentUserProfile) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    // Check if already following
-    const isFollowing = currentUserProfile.following.includes(username);
-
-    if (isFollowing) {
-      // Unfollow
-      currentUserProfile.following = currentUserProfile.following.filter((u) => u !== username);
-      userToFollow.followers = userToFollow.followers.filter((u) => u !== currentUser);
+    // เช็คว่าติดตามอยู่หรือยัง
+    const [rows] = await pool.query("SELECT * FROM followers WHERE user_id=? AND follower_username=?", [toFollow.id, currentUser]);
+    if (rows.length > 0) {
+      // unfollow
+      await pool.query("DELETE FROM followers WHERE user_id=? AND follower_username=?", [toFollow.id, currentUser]);
+      await pool.query("DELETE FROM following WHERE user_id=? AND following_username=?", [me.id, username]);
+      res.json({ message: "Unfollowed successfully" });
     } else {
-      // Follow
-      currentUserProfile.following.push(username);
-      userToFollow.followers.push(currentUser);
-
-      // เพิ่ม Notification
-      await addNotification({
-        id: Date.now(),
-        type: "follow",
-        sender: currentUser,
-        recipient: username,
-        timestamp: new Date().toISOString(),
-      });
+      // follow
+      await pool.query("INSERT INTO followers (user_id, follower_username) VALUES (?, ?)", [toFollow.id, currentUser]);
+      await pool.query("INSERT INTO following (user_id, following_username) VALUES (?, ?)", [me.id, username]);
+      // เพิ่ม notification เฉพาะถ้า follow คนอื่น
+      if (username !== currentUser) {
+        await addNotification({
+          id: Date.now(),
+          type: "follow",
+          sender: currentUser,
+          recipient: username,
+          postId: null,
+          text: null,
+          timestamp: new Date(),
+        });
+      }
+      res.json({ message: "Followed successfully" });
     }
-
-    // Save changes
-    await fsPromises.writeFile(profileDataPath, JSON.stringify(data, null, 2));
-
-    res.json({
-      message: isFollowing ? "Unfollowed successfully" : "Followed successfully",
-      followers: userToFollow.followers,
-      following: currentUserProfile.following,
-    });
   } catch (error) {
-    console.error("Error toggling follow:", error);
     res.status(500).json({ error: "Failed to toggle follow" });
+  }
+});
+
+// Get followers
+app.get("/api/profiles/:username/followers", async (req, res) => {
+  try {
+    const { username } = req.params;
+    const [[user]] = await pool.query("SELECT id FROM profiles WHERE username=?", [username]);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    const [rows] = await pool.query("SELECT follower_username FROM followers WHERE user_id=?", [user.id]);
+    res.json(rows.map(r => r.follower_username));
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get followers" });
+  }
+});
+
+// Get following
+app.get("/api/profiles/:username/following", async (req, res) => {
+  try {
+    const { username } = req.params;
+    const [[user]] = await pool.query("SELECT id FROM profiles WHERE username=?", [username]);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    const [rows] = await pool.query("SELECT following_username FROM following WHERE user_id=?", [user.id]);
+    res.json(rows.map(r => r.following_username));
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get following" });
   }
 });
 
 // เพิ่ม notification
 const addNotification = async (notification) => {
-  const data = await fsPromises.readFile(notificationsDataPath, "utf8");
-  const notifications = data ? JSON.parse(data).notifications : [];
-  notifications.push(notification);
-  await fsPromises.writeFile(notificationsDataPath, JSON.stringify({ notifications }, null, 2));
+  await pool.query(
+    "INSERT INTO notifications (id, type, sender, recipient, postId, text, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [
+      notification.id,
+      notification.type,
+      notification.sender,
+      notification.recipient,
+      notification.postId,
+      notification.text || null,
+      notification.timestamp,
+    ]
+  );
 };
 
 // API สำหรับดึง notification ของผู้ใช้
 app.get("/api/notifications/:username", async (req, res) => {
   try {
     const { username } = req.params;
-    console.log("Fetching notifications for username:", username);
-
-    const data = await fsPromises.readFile(notificationsDataPath, "utf8");
-    const notifications = JSON.parse(data).notifications;
-
-    // กรองการแจ้งเตือนสำหรับผู้ใช้ที่ระบุ
-    const userNotifications = notifications.filter((n) => n.recipient === username);
-    console.log("Filtered notifications:", userNotifications);
-
-    res.json(userNotifications);
+    const [notifications] = await pool.query(
+      "SELECT * FROM notifications WHERE recipient = ? ORDER BY timestamp DESC",
+      [username]
+    );
+    res.json(notifications);
   } catch (error) {
-    console.error("Error fetching notifications:", error);
     res.status(500).json({ error: "Failed to fetch notifications" });
   }
 });

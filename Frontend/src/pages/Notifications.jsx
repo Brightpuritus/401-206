@@ -10,25 +10,19 @@ const Notifications = ({ currentUser = { username: "" } }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("Current user:", currentUser);
-    if (!currentUser || !currentUser.username) {
-      console.error("currentUser is not defined or username is missing");
-      return;
-    }
-
+    if (!currentUser || !currentUser.username) return;
     const fetchNotifications = async () => {
       try {
         const response = await fetch(`http://localhost:5000/api/notifications/${currentUser.username}`);
         const data = await response.json();
-        console.log("Fetched notifications:", data);
-        setNotifications(data);
+        // เพิ่ม isRead = false ให้ทุกอัน (ถ้า backend ยังไม่มี)
+        setNotifications(data.map(n => ({ ...n, isRead: false })));
       } catch (error) {
         console.error("Error fetching notifications:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchNotifications();
   }, [currentUser]);
 
@@ -36,18 +30,11 @@ const Notifications = ({ currentUser = { username: "" } }) => {
     const date = new Date(timestamp)
     const now = new Date()
     const diffInSeconds = Math.floor((now - date) / 1000)
-
-    if (diffInSeconds < 60) {
-      return `${diffInSeconds}s`
-    } else if (diffInSeconds < 3600) {
-      return `${Math.floor(diffInSeconds / 60)}m`
-    } else if (diffInSeconds < 86400) {
-      return `${Math.floor(diffInSeconds / 3600)}h`
-    } else if (diffInSeconds < 604800) {
-      return `${Math.floor(diffInSeconds / 86400)}d`
-    } else {
-      return date.toLocaleDateString()
-    }
+    if (diffInSeconds < 60) return `${diffInSeconds}s`
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h`
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d`
+    return date.toLocaleDateString()
   }
 
   const filteredNotifications = notifications.filter((notification) => {
@@ -121,45 +108,50 @@ const Notifications = ({ currentUser = { username: "" } }) => {
 
       <div className="notifications-list">
         {filteredNotifications.length > 0 ? (
-          filteredNotifications.map((notification) => {
-            console.log("Rendering notification:", notification);
-            return (
-              <div
-                key={notification.id}
-                className={`notification-item ${!notification.isRead ? "unread" : ""}`}
-                onClick={() => markAsRead(notification.id)}
-              >
-                <div className="notification-avatar">
+          filteredNotifications.map((notification) => (
+            <div
+              key={notification.id}
+              className={`notification-item ${!notification.isRead ? "unread" : ""}`}
+              onClick={() => markAsRead(notification.id)}
+            >
+              <div className="notification-avatar">
+                <img
+                  src={
+                    notification.sender
+                      ? `http://localhost:5000/avatars/${notification.sender}.jpg`
+                      : "/placeholder.svg"
+                  }
+                  alt={notification.sender}
+                />
+              </div>
+              <div className="notification-content">
+                <p className="notification-text">
+                  <strong className="notification-username">{notification.sender}</strong>{" "}
+                  {notification.type === "like"
+                    ? "liked your post."
+                    : notification.type === "comment"
+                    ? `commented: "${notification.text}"`
+                    : notification.type === "follow"
+                    ? "started following you."
+                    : ""}
+                </p>
+                <span className="notification-time">{formatTime(notification.timestamp)}</span>
+              </div>
+              {notification.type === "like" || notification.type === "comment" ? (
+                <div className="notification-post-image">
                   <img
-                    src={`http://localhost:5000/avatars/${notification.sender}.jpg`}
-                    alt={notification.sender}
+                    src={
+                      notification.postId
+                        ? `http://localhost:5000/uploads/posts/${notification.postId}.jpg`
+                        : "/placeholder.svg"
+                    }
+                    alt="Post"
                   />
                 </div>
-                <div className="notification-content">
-                  <p className="notification-text">
-                    <strong className="notification-username">{notification.sender}</strong>{" "}
-                    {notification.type === "like"
-                      ? "liked your post."
-                      : notification.type === "comment"
-                      ? `commented: "${notification.text}"`
-                      : notification.type === "follow"
-                      ? "started following you."
-                      : ""}
-                  </p>
-                  <span className="notification-time">{formatTime(notification.timestamp)}</span>
-                </div>
-                {notification.type === "like" || notification.type === "comment" ? (
-                  <div className="notification-post-image">
-                    <img
-                      src={`http://localhost:5000/uploads/posts/${notification.postId}.jpg`}
-                      alt="Post"
-                    />
-                  </div>
-                ) : null}
-                {!notification.isRead && <div className="unread-indicator"></div>}
-              </div>
-            );
-          })
+              ) : null}
+              {!notification.isRead && <div className="unread-indicator"></div>}
+            </div>
+          ))
         ) : (
           <div className="no-notifications">
             <i className="fa-regular fa-bell"></i>
