@@ -50,11 +50,16 @@ const Messages = ({ currentUser }) => {
   }, [currentUser.username])
 
   useEffect(() => {
-    // Scroll to bottom when messages change
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+      const chatMessages = messagesEndRef.current.parentElement;
+      const isAtBottom =
+        chatMessages.scrollHeight - chatMessages.scrollTop === chatMessages.clientHeight;
+  
+      if (isAtBottom) {
+        messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      }
     }
-  }, [activeConversation])
+  }, [activeConversation]);
 
   useEffect(() => {
     if (activeConversation) {
