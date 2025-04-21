@@ -13,41 +13,57 @@ const Messages = ({ currentUser }) => {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/profiles")
-        if (response.ok) {
-          const data = await response.json()
+        try {
+            const response = await fetch("http://localhost:5000/api/profiles");
+            if (response.ok) {
+                const data = await response.json();
 
-          // กรองข้อมูลเพื่อไม่รวม currentUser
-          const filteredProfiles = data.filter(
-            (profile) => profile.username !== currentUser.username
-          )
+                const filteredProfiles = data.filter(
+                    (profile) => profile.username !== currentUser.username
+                );
 
-          // ตั้งค่า conversations
-          setConversations(
-            filteredProfiles.map((profile) => ({
-              id: profile.id,
-              user: {
-                id: profile.id,
-                username: profile.username,
-                avatar: profile.avatar 
-                  ? `http://localhost:5000${profile.avatar}`  // เพิ่ม base URL
-                  : "http://localhost:5000/avatars/placeholder-person.jpg", // แก้ path รูป placeholder
-                isOnline: profile.isOnline || false,
-              },
-              messages: [],
-            }))
-          )
+                const conversationsWithMessages = await Promise.all(
+                    filteredProfiles.map(async (profile) => {
+                        const messagesResponse = await fetch(
+                            `http://localhost:5000/api/chats/${currentUser.username}/${profile.username}`
+                        );
+                        const messages = messagesResponse.ok
+                            ? await messagesResponse.json()
+                            : [];
+
+                        return {
+                            id: profile.id,
+                            user: {
+                                id: profile.id,
+                                username: profile.username,
+                                avatar: profile.avatar
+                                    ? `http://localhost:5000${profile.avatar}`
+                                    : "http://localhost:5000/avatars/placeholder-person.jpg",
+                                isOnline: profile.isOnline || false,
+                            },
+                            messages,
+                        };
+                    })
+                );
+
+                // จัดเรียง conversations ตามข้อความล่าสุด
+                const sortedConversations = conversationsWithMessages.sort((a, b) => {
+                    const lastMessageA = a.messages[a.messages.length - 1]?.timestamp || 0;
+                    const lastMessageB = b.messages[b.messages.length - 1]?.timestamp || 0;
+                    return lastMessageB - lastMessageA;
+                });
+
+                setConversations(sortedConversations);
+            }
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        } finally {
+            setLoading(false);
         }
-      } catch (error) {
-        console.error("Error fetching users:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
+    };
 
-    fetchUsers()
-  }, [currentUser.username])
+    fetchUsers();
+}, [currentUser.username]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -70,47 +86,58 @@ const Messages = ({ currentUser }) => {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (message.trim() && activeConversation) {
-      const newMessage = {
-        sender: currentUser.username,
-        recipient: activeConversation.user.username,
-        text: message,
-      };
-  
-      try {
-        const response = await fetch("http://localhost:5000/api/chats", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newMessage),
-        });
-  
-        if (response.ok) {
-          const savedMessage = await response.json();
-  
-          setActiveConversation((prev) => ({
-            ...prev,
-            messages: [...prev.messages, savedMessage],
-          }));
-  
-          setConversations((prevConversations) =>
-            prevConversations.map((conv) =>
-              conv.id === activeConversation.id
-                ? {
-                    ...conv,
-                    messages: [...conv.messages, savedMessage],
-                  }
-                : conv
-            )
-          );
-  
-          setMessage("");
+        const newMessage = {
+            sender: currentUser.username,
+            recipient: activeConversation.user.username,
+            text: message,
+            timestamp: Date.now(),
+        };
+
+        try {
+            const response = await fetch("http://localhost:5000/api/chats", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newMessage),
+            });
+
+            if (response.ok) {
+                const savedMessage = await response.json();
+
+                setActiveConversation((prev) => ({
+                    ...prev,
+                    messages: [...prev.messages, savedMessage],
+                }));
+
+                setConversations((prevConversations) => {
+                    const updatedConversations = prevConversations.map((conv) =>
+                        conv.id === activeConversation.id
+                            ? {
+                                  ...conv,
+                                  messages: [...conv.messages, savedMessage],
+                              }
+                            : conv
+                    );
+
+                    // เลื่อน activeConversation ไปอยู่ด้านบน
+                    const activeConv = updatedConversations.find(
+                        (conv) => conv.id === activeConversation.id
+                    );
+                    const otherConversations = updatedConversations.filter(
+                        (conv) => conv.id !== activeConversation.id
+                    );
+
+                    return [activeConv, ...otherConversations];
+                });
+
+                setMessage("");
+            }
+        } catch (error) {
+            console.error("Error sending message:", error);
         }
-      } catch (error) {
-        console.error("Error sending message:", error);
-      }
     }
-  };
+};
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp)
