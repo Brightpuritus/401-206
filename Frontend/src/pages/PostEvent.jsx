@@ -9,7 +9,6 @@ const PostEvent = ({ currentUser }) => {
     description: "",
     date: "",
     time: "",
-    location: "",
     image: null,
   });
   const [error, setError] = useState("");
@@ -32,21 +31,11 @@ const PostEvent = ({ currentUser }) => {
     e.preventDefault();
 
     const formDataToSend = new FormData();
-    formDataToSend.append("username", currentUser.username);
     formDataToSend.append("title", formData.title);
     formDataToSend.append("description", formData.description);
     formDataToSend.append("date", formData.date);
     formDataToSend.append("time", formData.time);
-    formDataToSend.append("image", formData.image); // ตรวจสอบว่า image ถูกส่ง
-
-    console.log("Form Data:", {
-      username: currentUser.username,
-      title: formData.title,
-      description: formData.description,
-      date: formData.date,
-      time: formData.time,
-      image: formData.image,
-    });
+    formDataToSend.append("image", formData.image);
 
     try {
       const response = await fetch("http://localhost:5000/api/events", {
@@ -59,10 +48,8 @@ const PostEvent = ({ currentUser }) => {
       }
 
       const data = await response.json();
-      console.log("Event created:", data);
-      navigate("/events"); // นำทางไปยังหน้ารวมอีเว้นท์
+      navigate("/events");
     } catch (error) {
-      console.error("Error posting event:", error);
       setError("Failed to post event. Please try again.");
     }
   };
@@ -88,13 +75,13 @@ const PostEvent = ({ currentUser }) => {
           required
         />
         <input
-  type="date"
-  name="date"
-  value={formData.date}
-  onChange={handleChange}
-  min={new Date().toISOString().split("T")[0]}
-  required
-/>
+          type="date"
+          name="date"
+          value={formData.date}
+          onChange={handleChange}
+          min={new Date().toISOString().split("T")[0]}
+          required
+        />
         <input
           type="time"
           name="time"

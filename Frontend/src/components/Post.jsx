@@ -176,9 +176,6 @@ const Post = ({ post, currentUser }) => {
           <button className="post-action" onClick={() => setShowCommentForm(!showCommentForm)}>
             <i className="fa-regular fa-comment"></i>
           </button>
-          <button className="post-action">
-            <i className="fa-regular fa-paper-plane"></i>
-          </button>
         </div>
         <div className="post-actions-right">
           <button className={`post-action ${isSaved ? "saved" : ""}`} onClick={handleSave}>

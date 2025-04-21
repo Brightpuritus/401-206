@@ -32,17 +32,9 @@ const AllEvents = ({ currentUser }) => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/events/${eventId}`, {
+      await fetch(`http://localhost:5000/api/events/${eventId}`, {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username: currentUser.username }),
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete event");
-      }
 
       // อัปเดต state หลังจากลบสำเร็จ
       setEvents(events.filter((event) => event.id !== eventId));
@@ -62,12 +54,16 @@ const AllEvents = ({ currentUser }) => {
 
   const handleSaveEdit = async (updatedEvent) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/events/${updatedEvent.id}`, {
+      const formData = new FormData();
+      formData.append("title", editingEvent.title);
+      formData.append("description", editingEvent.description);
+      formData.append("date", editingEvent.date);
+      formData.append("time", editingEvent.time);
+      if (editingEvent.imageFile) formData.append("image", editingEvent.imageFile);
+
+      const response = await fetch(`http://localhost:5000/api/events/${editingEvent.id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedEvent),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -106,7 +102,11 @@ const AllEvents = ({ currentUser }) => {
                 <p className="event-description">{event.description}</p>
                 <p className="event-date">Date: {event.date}</p>
                 <p className="event-time">Time: {event.time}</p>
+<<<<<<< HEAD
                 {currentUser.username === "admin" && (
+=======
+                {currentUser?.username === "admin" && (
+>>>>>>> 1ebdca74da41f1f41b021f3c8cccacc785a72963
                   <div className="admin-actions">
                     <button
                       className="edit-event-btn"
@@ -171,6 +171,12 @@ const AllEvents = ({ currentUser }) => {
               value={editingEvent.time}
               onChange={(e) =>
                 setEditingEvent({ ...editingEvent, time: e.target.value })
+              }
+            />
+            <input
+              type="file"
+              onChange={(e) =>
+                setEditingEvent({ ...editingEvent, imageFile: e.target.files[0] })
               }
             />
             <button type="submit">Save</button>

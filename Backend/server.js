@@ -403,17 +403,18 @@ app.get("/api/profiles", (req, res) => {
 app.get("/api/chats/:user1/:user2", async (req, res) => {
   try {
     const { user1, user2 } = req.params;
-    const data = await fsPromises.readFile(chatDataPath, "utf8");
-    const chats = JSON.parse(data).chats;
-
-    // ค้นหาข้อความระหว่าง user1 และ user2
-    const conversation = chats.find(
-      (chat) =>
-        (chat.user1 === user1 && chat.user2 === user2) ||
-        (chat.user1 === user2 && chat.user2 === user1)
+    const [a, b] = [user1, user2].sort();
+    const [convs] = await pool.query(
+      "SELECT id FROM conversations WHERE user1_sorted=? AND user2_sorted=?",
+      [a, b]
     );
-
-    res.json(conversation ? conversation.messages : []);
+    if (convs.length === 0) return res.json([]);
+    const conversationId = convs[0].id;
+    const [messages] = await pool.query(
+      "SELECT * FROM messages WHERE conversation_id=? ORDER BY timestamp ASC",
+      [conversationId]
+    );
+    res.json(messages);
   } catch (error) {
     console.error("Error reading chat data:", error);
     res.status(500).json({ error: "Failed to read chat data" });
@@ -424,43 +425,17 @@ app.get("/api/chats/:user1/:user2", async (req, res) => {
 app.post("/api/chats", async (req, res) => {
   try {
     const { sender, recipient, text } = req.body;
-
     if (!sender || !recipient || !text) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-
-    const data = await fsPromises.readFile(chatDataPath, "utf8");
-    const chats = JSON.parse(data).chats;
-
-    // ค้นหาหรือสร้างบทสนทนาใหม่
-    let conversation = chats.find(
-      (chat) =>
-        (chat.user1 === sender && chat.user2 === recipient) ||
-        (chat.user1 === recipient && chat.user2 === sender)
+    const conversationId = await getOrCreateConversation(sender, recipient);
+    const messageId = Date.now();
+    const timestamp = new Date();
+    await pool.query(
+      "INSERT INTO messages (id, conversation_id, sender, text, timestamp) VALUES (?, ?, ?, ?, ?)",
+      [messageId, conversationId, sender, text, timestamp]
     );
-
-    if (!conversation) {
-      conversation = {
-        user1: sender,
-        user2: recipient,
-        messages: [],
-      };
-      chats.push(conversation);
-    }
-
-    // เพิ่มข้อความใหม่
-    const newMessage = {
-      id: Date.now(),
-      sender,
-      text,
-      timestamp: new Date().toISOString(),
-    };
-    conversation.messages.push(newMessage);
-
-    // บันทึกข้อมูลกลับไปยังไฟล์ JSON
-    await fsPromises.writeFile(chatDataPath, JSON.stringify({ chats }, null, 2));
-
-    res.status(201).json(newMessage);
+    res.status(201).json({ id: messageId, sender, text, timestamp });
   } catch (error) {
     console.error("Error saving chat data:", error);
     res.status(500).json({ error: "Failed to save chat data" });
@@ -563,139 +538,101 @@ app.get("/api/notifications/:username", async (req, res) => {
   }
 });
 
-app.get("/api/events", (req, res) => {
-  const eventsPath = path.join(__dirname, "data", "events.json");
-  fs.readFile(eventsPath, "utf8", (err, data) => {
-    if (err) {
-      console.error("Error reading events data:", err);
-      res.status(500).json({ error: "Failed to fetch events" });
-    } else {
-      res.json(JSON.parse(data).events);
-    }
-  });
-});
+// API สำหรับดึง notification ของผู้ใช้
 
-app.get("/api/events/:id", (req, res) => {
-  const eventId = parseInt(req.params.id, 10);
-  const eventsPath = path.join(__dirname, "data", "events.json");
-
-  fs.readFile(eventsPath, "utf8", (err, data) => {
-    if (err) {
-      console.error("Error reading events data:", err);
-      res.status(500).json({ error: "Failed to fetch event details" });
-    } else {
-      const events = JSON.parse(data).events;
-      const event = events.find((e) => e.id === eventId);
-      if (event) {
-        res.json(event);
-      } else {
-        res.status(404).json({ error: "Event not found" });
-      }
-    }
-  });
-});
-
-// Middleware สำหรับตรวจสอบ role ของ admin
-const checkAdminRole = async (req, res, next) => {
+app.get("/api/events", async (req, res) => {
   try {
-    const { username } = req.body; // รับ username จาก request body
-    const data = await fsPromises.readFile(profileDataPath, "utf8");
-    const profiles = JSON.parse(data).profiles;
-
-    const user = profiles.find((profile) => profile.username === username);
-    if (!user || user.role !== "admin") {
-      return res.status(403).json({ error: "Access denied. Admins only." });
-    }
-
-    next(); // อนุญาตให้ดำเนินการต่อ
+    const [events] = await pool.query("SELECT * FROM events ORDER BY id DESC");
+    res.json(events);
   } catch (error) {
-    console.error("Error checking admin role:", error);
-    res.status(500).json({ error: "Failed to check admin role" });
+    console.error("Error fetching events:", error);
+    res.status(500).json({ error: "Failed to fetch events" });
   }
-};
+});
+
+app.get("/api/events/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.query("SELECT * FROM events WHERE id = ?", [id]);
+    if (rows.length === 0) return res.status(404).json({ error: "Event not found" });
+    res.json(rows[0]);
+  } catch (error) {
+    console.error("Error fetching event details:", error);
+    res.status(500).json({ error: "Failed to fetch event details" });
+  }
+});
+
 
 // API สำหรับสร้างอีเว้นท์
-app.post("/api/events", upload.single("image"), checkAdminRole, async (req, res) => {
+app.post("/api/events", upload.single("image"), async (req, res) => {
   try {
-    const { title, description, date, time, location } = req.body;
-
+    const { title, description, date, time } = req.body;
     if (!title || !description || !date || !time || !req.file) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-
-    const eventsPath = path.join(__dirname, "data", "events.json");
-    const data = await fsPromises.readFile(eventsPath, "utf8");
-    const events = JSON.parse(data).events;
-
-    const newEvent = {
-      id: events.length + 1,
-      title,
-      description,
-      date,
-      time,
-      location,
-      image: `/uploads/${req.file.filename}`, // เก็บ path ของไฟล์ที่อัปโหลด
-    };
-
-    events.push(newEvent);
-    await fsPromises.writeFile(eventsPath, JSON.stringify({ events }, null, 2));
-    res.status(201).json({ message: "Event created successfully", event: newEvent });
+    const imagePath = `/uploads/${req.file.filename}`;
+    const [result] = await pool.query(
+      "INSERT INTO events (title, description, date, time, image) VALUES (?, ?, ?, ?, ?)",
+      [title, description, date, time, imagePath]
+    );
+    const [rows] = await pool.query("SELECT * FROM events WHERE id = ?", [result.insertId]);
+    res.status(201).json({ message: "Event created successfully", event: rows[0] });
   } catch (error) {
     console.error("Error creating event:", error);
     res.status(500).json({ error: "Failed to create event" });
   }
 });
 
-app.put("/api/events/:id", async (req, res) => {
+app.put("/api/events/:id", upload.single("image"), async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, date, time,  } = req.body;
-
-    const eventsPath = path.join(__dirname, "data", "events.json");
-    const data = await fsPromises.readFile(eventsPath, "utf8");
-    const events = JSON.parse(data).events;
-
-    const eventIndex = events.findIndex((event) => event.id === parseInt(id));
-    if (eventIndex === -1) {
-      return res.status(404).json({ error: "Event not found" });
+    const { title, description, date, time } = req.body;
+    let updateSql = "UPDATE events SET title=?, description=?, date=?, time=?";
+    let params = [title, description, date, time];
+    if (req.file) {
+      updateSql += ", image=?";
+      params.push(`/uploads/${req.file.filename}`);
     }
-
-    // อัปเดตข้อมูลอีเว้นท์
-    if (title) events[eventIndex].title = title;
-    if (description) events[eventIndex].description = description;
-    if (date) events[eventIndex].date = date;
-    if (time) events[eventIndex].time = time;
-
-    await fsPromises.writeFile(eventsPath, JSON.stringify({ events }, null, 2));
-    res.json({ message: "Event updated successfully", event: events[eventIndex] });
+    updateSql += " WHERE id=?";
+    params.push(id);
+    await pool.query(updateSql, params);
+    const [rows] = await pool.query("SELECT * FROM events WHERE id=?", [id]);
+    if (rows.length === 0) return res.status(404).json({ error: "Event not found" });
+    res.json({ message: "Event updated successfully", event: rows[0] });
   } catch (error) {
     console.error("Error updating event:", error);
     res.status(500).json({ error: "Failed to update event" });
   }
 });
 
-app.delete("/api/events/:id", checkAdminRole, async (req, res) => {
+app.delete("/api/events/:id", async (req, res) => {
   try {
     const { id } = req.params;
-
-    const eventsPath = path.join(__dirname, "data", "events.json");
-    const data = await fsPromises.readFile(eventsPath, "utf8");
-    const events = JSON.parse(data).events;
-
-    const eventIndex = events.findIndex((event) => event.id === parseInt(id));
-    if (eventIndex === -1) {
-      return res.status(404).json({ error: "Event not found" });
-    }
-
-    events.splice(eventIndex, 1);
-
-    await fsPromises.writeFile(eventsPath, JSON.stringify({ events }, null, 2));
+    const [rows] = await pool.query("SELECT * FROM events WHERE id=?", [id]);
+    if (rows.length === 0) return res.status(404).json({ error: "Event not found" });
+    await pool.query("DELETE FROM events WHERE id=?", [id]);
     res.json({ message: "Event deleted successfully" });
   } catch (error) {
     console.error("Error deleting event:", error);
     res.status(500).json({ error: "Failed to delete event" });
   }
 });
+
+async function getOrCreateConversation(userA, userB) {
+  const [a, b] = [userA, userB].sort();
+  // ค้นหา
+  const [rows] = await pool.query(
+    "SELECT id FROM conversations WHERE user1_sorted=? AND user2_sorted=?",
+    [a, b]
+  );
+  if (rows.length > 0) return rows[0].id;
+  // สร้างใหม่
+  const [result] = await pool.query(
+    "INSERT INTO conversations (user1, user2, user1_sorted, user2_sorted) VALUES (?, ?, ?, ?)",
+    [userA, userB, a, b]
+  );
+  return result.insertId;
+}
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

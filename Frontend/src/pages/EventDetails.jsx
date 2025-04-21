@@ -3,77 +3,73 @@ import { useParams, useNavigate } from "react-router-dom";
 import "./EventDetails.css";
 
 const EventDetails = ({ currentUser }) => {
-  const { eventId } = useParams(); // รับ eventId จาก URL
+  const { eventId } = useParams();
   const [event, setEvent] = useState(null);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
         const response = await fetch(`http://localhost:5000/api/events/${eventId}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch event details");
-        }
+        if (!response.ok) throw new Error("Failed to fetch event details");
         const data = await response.json();
         setEvent(data);
       } catch (error) {
         console.error("Error fetching event details:", error);
-        setEvent(null); // ตั้งค่า event เป็น null หากเกิดข้อผิดพลาด
+        setEvent(null);
       }
     };
-
     fetchEvent();
   }, [eventId]);
 
   const handleDelete = async () => {
     const confirmDelete = window.confirm("Are you sure you want to delete this event?");
     if (!confirmDelete) return;
-
     try {
       const response = await fetch(`http://localhost:5000/api/events/${eventId}`, {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username: currentUser.username }),
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete event");
-      }
-
-      console.log("Event deleted successfully");
-      navigate("/events"); // กลับไปที่หน้า AllEvents หลังจากลบสำเร็จ
+      if (!response.ok) throw new Error("Failed to delete event");
+      navigate("/events");
     } catch (error) {
       console.error("Error deleting event:", error);
     }
   };
 
   const handleEdit = () => {
-    setEditingEvent(event); // เปิดฟอร์มแก้ไข
+    setEditingEvent(event);
+    setImageFile(null);
   };
 
   const handleSaveEdit = async (updatedEvent) => {
     const confirmSave = window.confirm("Are you sure you want to save the changes?");
-    if (!confirmSave) return; // หากผู้ใช้กดยกเลิก จะไม่ดำเนินการต่อ
-
+    if (!confirmSave) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/events/${updatedEvent.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedEvent),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update event");
+      let response;
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append("title", updatedEvent.title);
+        formData.append("description", updatedEvent.description);
+        formData.append("date", updatedEvent.date);
+        formData.append("time", updatedEvent.time);
+        formData.append("image", imageFile);
+        response = await fetch(`http://localhost:5000/api/events/${updatedEvent.id}`, {
+          method: "PUT",
+          body: formData,
+        });
+      } else {
+        response = await fetch(`http://localhost:5000/api/events/${updatedEvent.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedEvent),
+        });
       }
-
-      setEvent(updatedEvent);
-      setEditingEvent(null); // ปิดฟอร์มแก้ไข
-      console.log("Event updated successfully");
+      if (!response.ok) throw new Error("Failed to update event");
+      const data = await response.json();
+      setEvent(data.event);
+      setEditingEvent(null);
     } catch (error) {
       console.error("Error updating event:", error);
     }
@@ -85,7 +81,7 @@ const EventDetails = ({ currentUser }) => {
 
   return (
     <div className="event-details-container">
-      {currentUser && currentUser.role === "admin" && (
+      {currentUser?.username === "admin" && (
         <div className="admin-actions">
           <button className="edit-event-btn" onClick={handleEdit}>
             Edit
@@ -105,6 +101,7 @@ const EventDetails = ({ currentUser }) => {
           <h1 className="event-details-title">{event.title}</h1>
           <p className="event-details-description">{event.description}</p>
           <p className="event-details-date">Date: {event.date}</p>
+          <p className="event-details-time">Time: {event.time}</p>
         </div>
       )}
       {editingEvent && (
@@ -113,7 +110,7 @@ const EventDetails = ({ currentUser }) => {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              handleSaveEdit(editingEvent); // เรียกฟังก์ชัน handleSaveEdit พร้อมการยืนยัน
+              handleSaveEdit(editingEvent);
             }}
           >
             <input
@@ -146,12 +143,9 @@ const EventDetails = ({ currentUser }) => {
               }
             />
             <input
-              type="text"
-              value={editingEvent.location || ""}
-              onChange={(e) =>
-                setEditingEvent({ ...editingEvent, location: e.target.value })
-              }
-              placeholder="Location"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImageFile(e.target.files[0])}
             />
             <button type="submit">Save</button>
             <button type="button" onClick={() => setEditingEvent(null)}>
