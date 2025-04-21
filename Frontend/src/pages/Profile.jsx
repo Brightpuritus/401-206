@@ -227,7 +227,6 @@ const Profile = ({ currentUser, onUpdateUser }) => {
       setSelectedPost(prev => prev?.id === postId ? { ...prev, likes: updatedPost.likes, likedBy: updatedPost.likedBy } : prev);
 
       // Refresh the page
-      window.location.reload();
     } catch (error) {
       console.error('Error liking/unliking post:', error);
     }
