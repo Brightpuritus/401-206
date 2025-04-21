@@ -79,6 +79,9 @@ const createRequiredDirectories = () => {
 // Call this before starting the server
 createRequiredDirectories();
 
+// post----------------------------------------------------------------------------------
+
+
 // Create a new post
 app.post("/api/posts", upload.single("image"), async (req, res) => {
   try {
@@ -127,8 +130,7 @@ app.get("/api/posts", async (req, res) => {
   }
 });
 
-// เพิ่ม API สำหรับไลค์โพสต์
-// API สำหรับไลค์โพสต์
+
 // API สำหรับไลค์/ยกเลิกไลค์โพสต์
 app.post("/api/posts/:id/toggle-like", async (req, res) => {
   try {
@@ -319,6 +321,10 @@ app.post("/api/posts/:id/comment", async (req, res) => {
   }
 });
 
+// endpost
+
+// profile----------------------------------------------------------------------------------
+
 // Get all profiles
 app.get("/api/profiles", async (req, res) => {
   try {
@@ -435,6 +441,10 @@ app.get('/api/tagged/:username', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+//end profile
+
+// login/register----------------------------------------------------------------------------------
 
 // API สำหรับบันทึกข้อมูลผู้ใช้
 app.post("/api/register", async (req, res) => {
