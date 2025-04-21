@@ -188,9 +188,6 @@ const Messages = ({ currentUser }) => {
       <div className="conversations-sidebar">
         <div className="conversations-header">
           <h2>{currentUser.username}</h2>
-          <button className="new-message-btn">
-            <i className="fa-solid fa-pen-to-square"></i>
-          </button>
         </div>
 
         <div className="conversations-list">
@@ -253,17 +250,6 @@ const Messages = ({ currentUser }) => {
                   </div>
                 </div>
               </Link>
-              <div className="chat-actions">
-                <button className="chat-action">
-                  <i className="fa-solid fa-phone"></i>
-                </button>
-                <button className="chat-action">
-                  <i className="fa-solid fa-video"></i>
-                </button>
-                <button className="chat-action">
-                  <i className="fa-solid fa-circle-info"></i>
-                </button>
-              </div>
             </div>
 
             <div className="chat-messages">
