@@ -358,8 +358,10 @@
       "username": "KK",
       "image": "/uploads/1745157849319-placeholder-person.png",
       "caption": "ำำำ",
-      "likes": 0,
-      "likedBy": [],
+      "likes": 1,
+      "likedBy": [
+        "KK"
+      ],
       "comments": [
         {
           "id": 1745158331857,
@@ -367,6 +369,9 @@
           "text": "ไๆด-ๆด",
           "timestamp": "2025-04-20T14:12:11.857Z"
         }
+      ],
+      "savedBy": [
+        "KK"
       ]
     },
     {
@@ -374,8 +379,10 @@
       "username": "KK",
       "image": "/uploads/1745158089453-placeholder-person.png",
       "caption": "ๆดๆไดๆด",
-      "likes": 0,
-      "likedBy": [],
+      "likes": 1,
+      "likedBy": [
+        "KK"
+      ],
       "comments": [
         {
           "id": 1745158326438,
@@ -395,6 +402,9 @@
           "text": "wgwg",
           "timestamp": "2025-04-21T13:54:38.492Z"
         }
+      ],
+      "savedBy": [
+        "KK"
       ]
     }
   ]
