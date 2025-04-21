@@ -272,7 +272,8 @@ app.get("/api/profiles/:username", async (req, res) => {
     if (rows.length === 0) return res.status(404).json({ error: 'Profile not found' });
     res.json(rows[0]);
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error fetching profile:", error);
+    res.status(500).json({ error: "Failed to fetch profile" });
   }
 });
 
@@ -645,10 +646,10 @@ app.post("/api/events", upload.single("image"), checkAdminRole, async (req, res)
   }
 });
 
-app.put("/api/events/:id", checkAdminRole, async (req, res) => {
+app.put("/api/events/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, date, time, location, image } = req.body;
+    const { title, description, date, time,  } = req.body;
 
     const eventsPath = path.join(__dirname, "data", "events.json");
     const data = await fsPromises.readFile(eventsPath, "utf8");
@@ -664,8 +665,6 @@ app.put("/api/events/:id", checkAdminRole, async (req, res) => {
     if (description) events[eventIndex].description = description;
     if (date) events[eventIndex].date = date;
     if (time) events[eventIndex].time = time;
-    if (location) events[eventIndex].location = location;
-    if (image) events[eventIndex].image = image;
 
     await fsPromises.writeFile(eventsPath, JSON.stringify({ events }, null, 2));
     res.json({ message: "Event updated successfully", event: events[eventIndex] });

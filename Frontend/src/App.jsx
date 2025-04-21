@@ -17,8 +17,7 @@ import PostEvent from "./pages/PostEvent"
 import "./App.css"
 import "./styles/auth.css"  // ให้ import auth.css หลัง App.css
 
-const App = () => {
-  const [currentUser, setCurrentUser] = useState(null)
+const App = () => {    const [currentUser, setCurrentUser] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -95,7 +94,7 @@ const App = () => {
             />
             <Route 
               path="/events/:eventId" 
-              element={currentUser ? <EventDetails /> : <Navigate to="/login" />} 
+              element={currentUser ? <EventDetails currentUser={currentUser} /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/post-event" 

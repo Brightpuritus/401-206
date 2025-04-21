@@ -37,7 +37,6 @@ const PostEvent = ({ currentUser }) => {
     formDataToSend.append("description", formData.description);
     formDataToSend.append("date", formData.date);
     formDataToSend.append("time", formData.time);
-    formDataToSend.append("location", formData.location);
     formDataToSend.append("image", formData.image); // ตรวจสอบว่า image ถูกส่ง
 
     console.log("Form Data:", {
@@ -46,7 +45,6 @@ const PostEvent = ({ currentUser }) => {
       description: formData.description,
       date: formData.date,
       time: formData.time,
-      location: formData.location,
       image: formData.image,
     });
 
@@ -90,12 +88,13 @@ const PostEvent = ({ currentUser }) => {
           required
         />
         <input
-          type="date"
-          name="date"
-          value={formData.date}
-          onChange={handleChange}
-          required
-        />
+  type="date"
+  name="date"
+  value={formData.date}
+  onChange={handleChange}
+  min={new Date().toISOString().split("T")[0]}
+  required
+/>
         <input
           type="time"
           name="time"

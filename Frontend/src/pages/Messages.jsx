@@ -30,10 +30,12 @@ const Messages = ({ currentUser }) => {
               user: {
                 id: profile.id,
                 username: profile.username,
-                avatar: profile.avatar || "/placeholder.svg",
+                avatar: profile.avatar 
+                  ? `http://localhost:5000${profile.avatar}`  // เพิ่ม base URL
+                  : "http://localhost:5000/avatars/placeholder-person.jpg", // แก้ path รูป placeholder
                 isOnline: profile.isOnline || false,
               },
-              messages: [], // เริ่มต้นเป็นข้อความว่าง
+              messages: [],
             }))
           )
         }
@@ -48,11 +50,16 @@ const Messages = ({ currentUser }) => {
   }, [currentUser.username])
 
   useEffect(() => {
-    // Scroll to bottom when messages change
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+      const chatMessages = messagesEndRef.current.parentElement;
+      const isAtBottom =
+        chatMessages.scrollHeight - chatMessages.scrollTop === chatMessages.clientHeight;
+  
+      if (isAtBottom) {
+        messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      }
     }
-  }, [activeConversation])
+  }, [activeConversation]);
 
   useEffect(() => {
     if (activeConversation) {
