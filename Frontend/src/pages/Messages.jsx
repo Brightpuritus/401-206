@@ -30,10 +30,12 @@ const Messages = ({ currentUser }) => {
               user: {
                 id: profile.id,
                 username: profile.username,
-                avatar: profile.avatar || "/placeholder.svg",
+                avatar: profile.avatar 
+                  ? `http://localhost:5000${profile.avatar}`  // เพิ่ม base URL
+                  : "http://localhost:5000/avatars/placeholder-person.jpg", // แก้ path รูป placeholder
                 isOnline: profile.isOnline || false,
               },
-              messages: [], // เริ่มต้นเป็นข้อความว่าง
+              messages: [],
             }))
           )
         }
