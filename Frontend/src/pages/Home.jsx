@@ -97,11 +97,7 @@ const Home = ({ currentUser }) => {
         <div className="suggestions card">
           <div className="suggestions-header">
             <h4>Events</h4>
-<<<<<<< HEAD
             {currentUser.username === "admin" && (
-=======
-            {currentUser?.username === "admin" && (
->>>>>>> 1ebdca74da41f1f41b021f3c8cccacc785a72963
                 <button onClick={() => navigate("/post-event")} className="post-event-btn">
                   Post Event
                 </button>

@@ -102,11 +102,7 @@ const AllEvents = ({ currentUser }) => {
                 <p className="event-description">{event.description}</p>
                 <p className="event-date">Date: {event.date}</p>
                 <p className="event-time">Time: {event.time}</p>
-<<<<<<< HEAD
                 {currentUser.username === "admin" && (
-=======
-                {currentUser?.username === "admin" && (
->>>>>>> 1ebdca74da41f1f41b021f3c8cccacc785a72963
                   <div className="admin-actions">
                     <button
                       className="edit-event-btn"

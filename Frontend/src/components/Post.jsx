@@ -17,6 +17,8 @@ const Post = ({ post, currentUser }) => {
   const [editedImage, setEditedImage] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const [showCommentForm, setShowCommentForm] = useState(false);
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
 
   useEffect(() => {
     const fetchPostUserProfile = async () => {
@@ -134,6 +136,16 @@ const Post = ({ post, currentUser }) => {
     }
   };
 
+  const handleOpenPostModal = () => {
+    setSelectedPost(post);
+    setShowPostModal(true);
+  };
+
+  const handleClosePostModal = () => {
+    setShowPostModal(false);
+    setSelectedPost(null);
+  };
+
   const displayedComments = showAllComments ? comments : comments.slice(0, 2);
 
   return (
@@ -165,7 +177,13 @@ const Post = ({ post, currentUser }) => {
       </div>
 
       <div className="post-image">
-        <img src={`http://localhost:5000${post.image}`} alt="Post" />
+        <img
+          src={`http://localhost:5000${post.image}`}
+          alt="Post"
+          className="post-image-hover"
+          style={{ cursor: "pointer" }}
+          onClick={handleOpenPostModal}
+        />
       </div>
 
       <div className="post-actions">
@@ -239,6 +257,79 @@ const Post = ({ post, currentUser }) => {
           />
           <button type="submit">Post</button>
         </form>
+      )}
+
+      {showPostModal && selectedPost && (
+        <>
+          <div className="modal-overlay" onClick={handleClosePostModal} />
+          <div className="post-modal">
+            <div className="post-modal-content">
+              <div className="post-modal-left">
+                <img
+                  src={`http://localhost:5000${selectedPost.image}`}
+                  alt={selectedPost.caption}
+                  className="post-image-hover"
+                />
+              </div>
+              <div className="post-modal-right">
+                <div className="post-modal-header">
+                  <Link to={`/profile/${selectedPost.username}`} className="post-user-info">
+                    <img
+                      src={postUserProfile?.avatar ? `http://localhost:5000${postUserProfile.avatar}` : "/placeholder.svg"}
+                      alt={selectedPost.username}
+                    />
+                    <span>{selectedPost.username}</span>
+                  </Link>
+                  <button className="close-modal-btn" onClick={handleClosePostModal}>
+                    <i className="fas fa-times"></i>
+                  </button>
+                </div>
+                <div className="post-modal-comments">
+                  <div className="post-caption">
+                    <span className="username">{selectedPost.username}</span>
+                    {selectedPost.caption}
+                  </div>
+                  {selectedPost.comments.map((comment) => (
+                    <div key={comment.id} className="comment">
+                      <span className="username">{comment.username}</span>
+                      {comment.text}
+                    </div>
+                  ))}
+                </div>
+                <div className="post-modal-actions">
+                  <div className="post-actions">
+                    <button className="action-btn" onClick={handleLike}>
+                      <i className={`fas fa-heart ${isLiked ? "liked" : ""}`}></i>
+                    </button>
+                    <button className="action-btn" onClick={() => setShowCommentForm(!showCommentForm)}>
+                      <i className="fas fa-comment"></i>
+                    </button>
+                    <button className="action-btn" onClick={handleSave}>
+                      <i className={`far fa-bookmark ${isSaved ? "saved" : ""}`}></i>
+                    </button>
+                  </div>
+                  <div className="likes-count">{likesCount} likes</div>
+                </div>
+                <form
+                  className="comment-form"
+                  onSubmit={handleComment}
+                >
+                  <textarea
+                    name="comment"
+                    className="comment-input"
+                    placeholder="Add a comment..."
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    rows="1"
+                  />
+                  <button type="submit" className="post-comment-btn">
+                    Post
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

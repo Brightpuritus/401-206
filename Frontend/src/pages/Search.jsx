@@ -14,6 +14,17 @@ const Search = () => {
     tags: [],
   });
   const [loading, setLoading] = useState(false);
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+
+  const handleOpenPostModal = (post) => {
+    setSelectedPost(post);
+    setShowPostModal(true);
+  };
+  const handleClosePostModal = () => {
+    setShowPostModal(false);
+    setSelectedPost(null);
+  };
 
   const performSearch = async (query) => {
     if (!query.trim()) return;
@@ -104,7 +115,12 @@ const Search = () => {
                   <h3>Posts</h3>
                   <div className="posts-grid">
                     {results.posts.map((post) => (
-                      <div key={post.id} className="post-grid-item">
+                      <div
+                        key={post.id}
+                        className="post-grid-item"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => handleOpenPostModal(post)}
+                      >
                         <img src={post.image ? `http://localhost:5000${post.image}` : "/placeholder.svg"} alt="Post" />
                         <div className="post-overlay">
                           <div className="post-stats">
@@ -114,7 +130,7 @@ const Search = () => {
                             <div className="post-stat">
                               <i className="fa-solid fa-comment"></i> {post.comments.length}
                             </div>
-                          </div>                              
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -124,6 +140,63 @@ const Search = () => {
             </>
           )}
         </div>
+      )}
+
+      {showPostModal && selectedPost && (
+        <>
+          <div className="modal-overlay" onClick={handleClosePostModal} />
+          <div className="post-modal">
+            <div className="post-modal-content">
+              <div className="post-modal-left">
+                <img
+                  src={`http://localhost:5000${selectedPost.image}`}
+                  alt={selectedPost.caption}
+                  className="post-image-hover"
+                />
+              </div>
+              <div className="post-modal-right">
+                <div className="post-modal-header">
+                  <Link to={`/profile/${selectedPost.username}`} className="post-user-info">
+                    <img
+                      src={selectedPost.avatar ? `http://localhost:5000${selectedPost.avatar}` : "/placeholder.svg"}
+                      alt={selectedPost.username}
+                    />
+                    <span>{selectedPost.username}</span>
+                  </Link>
+                  <button className="close-modal-btn" onClick={handleClosePostModal}>
+                    <i className="fas fa-times"></i>
+                  </button>
+                </div>
+                <div className="post-modal-comments">
+                  <div className="post-caption">
+                    <span className="username">{selectedPost.username}</span>
+                    {selectedPost.caption}
+                  </div>
+                  {selectedPost.comments?.map((comment) => (
+                    <div key={comment.id} className="comment">
+                      <span className="username">{comment.username}</span>
+                      {comment.text}
+                    </div>
+                  ))}
+                </div>
+                <div className="post-modal-actions">
+                  <div className="post-actions">
+                    <button className="action-btn">
+                      <i className="fas fa-heart"></i>
+                    </button>
+                    <button className="action-btn">
+                      <i className="fas fa-comment"></i>
+                    </button>
+                    <button className="action-btn">
+                      <i className="far fa-bookmark"></i>
+                    </button>
+                  </div>
+                  <div className="likes-count">{selectedPost.likes} likes</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
