@@ -44,13 +44,22 @@ const AllEvents = ({ currentUser }) => {
     }
   };
 
+  const handleEventClick = (eventId) => {
+    navigate(`/events/${eventId}`); // เปลี่ยนเส้นทางไปยัง EventDetails พร้อมส่ง eventId
+  };
+
   return (
     <div className="all-events-container">
       <h1>All Events</h1>
       <div className="events-list">
         {events.length > 0 ? (
           events.map((event) => (
-            <div key={event.id} className="event-item">
+            <div
+              key={event.id}
+              className="event-item"
+              onClick={() => handleEventClick(event.id)} // เพิ่ม onClick เพื่อเปลี่ยนเส้นทาง
+              style={{ cursor: "pointer" }} // เพิ่ม cursor pointer เพื่อแสดงว่าเป็นลิงก์
+            >
               <img
                 src={`http://localhost:5000${event.image}`}
                 alt={event.title}
@@ -64,7 +73,10 @@ const AllEvents = ({ currentUser }) => {
                 {currentUser.role === "admin" && (
                   <button
                     className="delete-event-btn"
-                    onClick={() => handleDelete(event.id)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // ป้องกันการเรียก handleEventClick
+                      handleDelete(event.id);
+                    }}
                   >
                     Delete
                   </button>
