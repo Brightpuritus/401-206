@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./EventDetails.css";
+import "./allEvents.css";
 
 const EventDetails = ({ currentUser }) => {
   const { eventId } = useParams();
@@ -39,37 +40,42 @@ const EventDetails = ({ currentUser }) => {
   };
 
   const handleEdit = () => {
-    setEditingEvent(event);
+    setEditingEvent({
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      date: new Date(event.date).toISOString().split("T")[0], // แปลงวันที่เป็น YYYY-MM-DD
+      time: event.time,
+      imageFile: null, // ตั้งค่าเริ่มต้นเป็น null เพราะยังไม่ได้เลือกไฟล์ใหม่
+    });
     setImageFile(null);
   };
 
-  const handleSaveEdit = async (updatedEvent) => {
+  const handleSaveEdit = async () => {
     const confirmSave = window.confirm("Are you sure you want to save the changes?");
     if (!confirmSave) return;
+
     try {
-      let response;
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append("title", updatedEvent.title);
-        formData.append("description", updatedEvent.description);
-        formData.append("date", updatedEvent.date);
-        formData.append("time", updatedEvent.time);
-        formData.append("image", imageFile);
-        response = await fetch(`http://localhost:5000/api/events/${updatedEvent.id}`, {
-          method: "PUT",
-          body: formData,
-        });
-      } else {
-        response = await fetch(`http://localhost:5000/api/events/${updatedEvent.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedEvent),
-        });
+      const formData = new FormData();
+      formData.append("title", editingEvent.title);
+      formData.append("description", editingEvent.description);
+      formData.append("date", editingEvent.date);
+      formData.append("time", editingEvent.time);
+      if (imageFile) formData.append("image", imageFile);
+
+      const response = await fetch(`http://localhost:5000/api/events/${editingEvent.id}`, {
+        method: "PUT",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update event");
       }
-      if (!response.ok) throw new Error("Failed to update event");
-      const data = await response.json();
-      setEvent(data.event);
-      setEditingEvent(null);
+
+      const updatedEvent = await response.json();
+      setEvent(updatedEvent.event); // อัปเดตข้อมูลใน state
+      setEditingEvent(null); // ปิดฟอร์มแก้ไข
+      console.log("Event updated successfully");
     } catch (error) {
       console.error("Error updating event:", error);
     }
@@ -81,16 +87,6 @@ const EventDetails = ({ currentUser }) => {
 
   return (
     <div className="event-details-container">
-      {currentUser?.username === "admin" && (
-        <div className="admin-actions">
-          <button className="edit-event-btn" onClick={handleEdit}>
-            Edit
-          </button>
-          <button className="delete-event-btn" onClick={handleDelete}>
-            Delete
-          </button>
-        </div>
-      )}
       <img
         src={`http://localhost:5000${event.image}`}
         alt={event.title}
@@ -104,55 +100,84 @@ const EventDetails = ({ currentUser }) => {
           <p className="event-details-time">Time: {event.time}</p>
         </div>
       )}
-      {editingEvent && (
-        <div className="edit-event-form">
-          <h2>Edit Event</h2>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSaveEdit(editingEvent);
-            }}
-          >
-            <input
-              type="text"
-              value={editingEvent.title || ""}
-              onChange={(e) =>
-                setEditingEvent({ ...editingEvent, title: e.target.value })
-              }
-              placeholder="Title"
-            />
-            <textarea
-              value={editingEvent.description || ""}
-              onChange={(e) =>
-                setEditingEvent({ ...editingEvent, description: e.target.value })
-              }
-              placeholder="Description"
-            />
-            <input
-              type="date"
-              value={editingEvent.date || ""}
-              onChange={(e) =>
-                setEditingEvent({ ...editingEvent, date: e.target.value })
-              }
-            />
-            <input
-              type="time"
-              value={editingEvent.time || ""}
-              onChange={(e) =>
-                setEditingEvent({ ...editingEvent, time: e.target.value })
-              }
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImageFile(e.target.files[0])}
-            />
-            <button type="submit">Save</button>
-            <button type="button" onClick={() => setEditingEvent(null)}>
-              Cancel
-            </button>
-          </form>
+      {currentUser?.username === "admin" && (
+        <div className="fixed-buttons">
+        <div className="admin-actions">
+          <button className="edit-event-btn" onClick={handleEdit}>
+            Edit
+          </button>
+          <button className="delete-event-btn" onClick={handleDelete}>
+            Delete
+          </button>
         </div>
+        </div>
+      )}
+      {editingEvent && (
+        <>
+          {/* พื้นหลังมืด */}
+          <div className="popup-overlay" onClick={() => setEditingEvent(null)}></div>
+
+          {/* ฟอร์มแก้ไข */}
+          <div className="post-event-container">
+            <h1>Edit Event</h1>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSaveEdit();
+              }}
+              className="post-event-form"
+            >
+              <input
+                type="text"
+                name="title"
+                placeholder="Event Title"
+                value={editingEvent.title || ""}
+                onChange={(e) =>
+                  setEditingEvent({ ...editingEvent, title: e.target.value })
+                }
+                required
+              />
+              <textarea
+                name="description"
+                placeholder="Event Description"
+                value={editingEvent.description || ""}
+                onChange={(e) =>
+                  setEditingEvent({ ...editingEvent, description: e.target.value })
+                }
+                required
+              />
+              <input
+                type="date"
+                name="date"
+                value={editingEvent.date || ""}
+                onChange={(e) =>
+                  setEditingEvent({ ...editingEvent, date: e.target.value })
+                }
+                min={new Date().toISOString().split("T")[0]}
+                required
+              />
+              <input
+                type="time"
+                name="time"
+                value={editingEvent.time || ""}
+                onChange={(e) =>
+                  setEditingEvent({ ...editingEvent, time: e.target.value })
+                }
+                required
+              />
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                onChange={(e) => setImageFile(e.target.files[0])}
+              />
+              <button type="submit">Save Changes</button>
+              <button type="button" onClick={() => setEditingEvent(null)}>
+                Cancel
+              </button>
+            </form>
+          </div>
+        </>
       )}
     </div>
   );
