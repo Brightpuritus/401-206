@@ -76,12 +76,6 @@ const Messages = ({ currentUser }) => {
     }
   }, [activeConversation]);
 
-  useEffect(() => {
-    if (activeConversation) {
-      fetchMessages(activeConversation.user.username);
-    }
-  }, [activeConversation]);
-
   const fetchMessages = async (recipient) => {
     try {
       const response = await fetch(
@@ -89,10 +83,6 @@ const Messages = ({ currentUser }) => {
       );
       if (response.ok) {
         const messages = await response.json();
-        setActiveConversation((prev) => ({
-          ...prev,
-          messages,
-        }));
         setConversations((prevConversations) => {
           const updated = prevConversations.map((conv) =>
             conv.user.username === recipient
@@ -101,6 +91,11 @@ const Messages = ({ currentUser }) => {
           );
           return sortConversationsByLastMessage(updated);
         });
+        setActiveConversation((prev) =>
+          prev && prev.user.username === recipient
+            ? { ...prev, messages }
+            : prev
+        );
       }
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -185,7 +180,10 @@ const Messages = ({ currentUser }) => {
                 activeConversation?.id === conversation.id ? "active" : ""
               }`}
               onClick={() => {
-                setActiveConversation(conversation);
+                setActiveConversation({
+                  ...conversation,
+                  messages: [], // ล้างข้อความก่อน
+                });
                 fetchMessages(conversation.user.username);
               }}
             >
@@ -254,9 +252,7 @@ const Messages = ({ currentUser }) => {
               <div ref={messagesEndRef} />
             </div>
             <form className="message-input" onSubmit={handleSendMessage}>
-              <button type="button" className="message-attachment">
-                <i className="fa-solid fa-image"></i>
-              </button>
+              
               <input
                 type="text"
                 placeholder="Message..."
