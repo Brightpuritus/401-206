@@ -4,6 +4,8 @@ const fsPromises = require("fs").promises;
 const path = require("path");
 const cors = require("cors");
 const multer = require("multer");
+const swaggerUi = require('swagger-ui-express');
+const swaggerJSDoc = require('swagger-jsdoc');
 const app = express();
 const PORT = process.env.PORT || 5000;
 const pool = require('./db');
@@ -79,6 +81,506 @@ const createRequiredDirectories = () => {
 
 // Call this before starting the server
 createRequiredDirectories();
+
+// Swagger setup
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "My App API",
+      version: "1.0.0",
+      description: "API documentation for your app",
+    },
+    servers: [
+      { url: "http://localhost:5000" }
+    ],
+  },
+  apis: [__filename], // หรือใส่ path ของไฟล์ route อื่นๆ
+};
+
+const swaggerSpec = swaggerJSDoc(swaggerOptions);
+
+// เพิ่ม endpoint สำหรับ Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+/**
+ * @swagger
+ * tags:
+ *   - name: Posts
+ *     description: Post management
+ *   - name: Profiles
+ *     description: User profile management
+ *   - name: Events
+ *     description: Event management
+ *   - name: Chats
+ *     description: Chat management
+ *   - name: Notifications
+ *     description: Notification management
+ */
+
+/**
+ * @swagger
+ * /api/posts:
+ *   get:
+ *     tags: [Posts]
+ *     summary: Get all posts
+ *     responses:
+ *       200:
+ *         description: List of posts
+ *   post:
+ *     tags: [Posts]
+ *     summary: Create a new post
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: formData
+ *         name: username
+ *         type: string
+ *         required: true
+ *       - in: formData
+ *         name: caption
+ *         type: string
+ *         required: true
+ *       - in: formData
+ *         name: image
+ *         type: file
+ *         required: true
+ *     responses:
+ *       201:
+ *         description: Post created successfully
+ */
+
+/**
+ * @swagger
+ * /api/posts/{id}:
+ *   put:
+ *     tags: [Posts]
+ *     summary: Update a post by id
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: formData
+ *         name: caption
+ *         type: string
+ *         required: true
+ *       - in: formData
+ *         name: image
+ *         type: file
+ *         required: false
+ *     responses:
+ *       200:
+ *         description: Post updated successfully
+ *   delete:
+ *     tags: [Posts]
+ *     summary: Delete a post by id
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Post deleted successfully
+ */
+
+/**
+ * @swagger
+ * /api/posts/{id}/toggle-like:
+ *   post:
+ *     tags: [Posts]
+ *     summary: Like or unlike a post
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: body
+ *         name: username
+ *         schema:
+ *           type: object
+ *           properties:
+ *             username:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Like toggled
+ */
+
+/**
+ * @swagger
+ * /api/posts/{id}/comment:
+ *   post:
+ *     tags: [Posts]
+ *     summary: Add a comment to a post
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: body
+ *         name: comment
+ *         schema:
+ *           type: object
+ *           properties:
+ *             username:
+ *               type: string
+ *             text:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Comment added
+ */
+
+/**
+ * @swagger
+ * /api/posts/{id}/toggle-save:
+ *   post:
+ *     tags: [Posts]
+ *     summary: Save or unsave a post
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: body
+ *         name: username
+ *         schema:
+ *           type: object
+ *           properties:
+ *             username:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Save toggled
+ */
+
+/**
+ * @swagger
+ * /api/profiles:
+ *   get:
+ *     tags: [Profiles]
+ *     summary: Get all profiles
+ *     responses:
+ *       200:
+ *         description: List of profiles
+ */
+
+/**
+ * @swagger
+ * /api/profiles/{username}:
+ *   get:
+ *     tags: [Profiles]
+ *     summary: Get a profile by username
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Profile data
+ */
+
+/**
+ * @swagger
+ * /api/profiles/{id}:
+ *   put:
+ *     tags: [Profiles]
+ *     summary: Update a profile
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: body
+ *         name: profile
+ *         schema:
+ *           type: object
+ *           properties:
+ *             fullName:
+ *               type: string
+ *             bio:
+ *               type: string
+ *             website:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Profile updated
+ */
+
+/**
+ * @swagger
+ * /api/profiles/{id}/avatar:
+ *   put:
+ *     tags: [Profiles]
+ *     summary: Update profile avatar
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: formData
+ *         name: avatar
+ *         type: file
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Avatar updated
+ */
+
+/**
+ * @swagger
+ * /api/profiles/{username}/toggle-follow:
+ *   post:
+ *     tags: [Profiles]
+ *     summary: Follow or unfollow a user
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: body
+ *         name: currentUser
+ *         schema:
+ *           type: object
+ *           properties:
+ *             currentUser:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Follow/unfollow result
+ */
+
+/**
+ * @swagger
+ * /api/profiles/{username}/followers:
+ *   get:
+ *     tags: [Profiles]
+ *     summary: Get followers of a user
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of followers
+ */
+
+/**
+ * @swagger
+ * /api/profiles/{username}/following:
+ *   get:
+ *     tags: [Profiles]
+ *     summary: Get following of a user
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of following
+ */
+
+/**
+ * @swagger
+ * /api/events:
+ *   get:
+ *     tags: [Events]
+ *     summary: Get all events
+ *     responses:
+ *       200:
+ *         description: List of events
+ *   post:
+ *     tags: [Events]
+ *     summary: Create a new event
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: formData
+ *         name: title
+ *         type: string
+ *         required: true
+ *       - in: formData
+ *         name: description
+ *         type: string
+ *         required: true
+ *       - in: formData
+ *         name: date
+ *         type: string
+ *         required: true
+ *       - in: formData
+ *         name: time
+ *         type: string
+ *         required: true
+ *       - in: formData
+ *         name: image
+ *         type: file
+ *         required: true
+ *     responses:
+ *       201:
+ *         description: Event created
+ */
+
+/**
+ * @swagger
+ * /api/events/{id}:
+ *   get:
+ *     tags: [Events]
+ *     summary: Get event by id
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Event data
+ *   put:
+ *     tags: [Events]
+ *     summary: Update event by id
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Event updated
+ *   delete:
+ *     tags: [Events]
+ *     summary: Delete event by id
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Event deleted
+ */
+
+/**
+ * @swagger
+ * /api/chats/{user1}/{user2}:
+ *   get:
+ *     tags: [Chats]
+ *     summary: Get chat messages between two users
+ *     parameters:
+ *       - in: path
+ *         name: user1
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: user2
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of messages
+ */
+
+/**
+ * @swagger
+ * /api/chats:
+ *   post:
+ *     tags: [Chats]
+ *     summary: Add a new message to the chat
+ *     parameters:
+ *       - in: body
+ *         name: message
+ *         schema:
+ *           type: object
+ *           properties:
+ *             sender:
+ *               type: string
+ *             recipient:
+ *               type: string
+ *             text:
+ *               type: string
+ *     responses:
+ *       201:
+ *         description: Message sent
+ */
+
+/**
+ * @swagger
+ * /api/notifications/{username}:
+ *   get:
+ *     tags: [Notifications]
+ *     summary: Get notifications for a user
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of notifications
+ */
+
+/**
+ * @swagger
+ * /api/posts/{id}:
+ *   delete:
+ *     summary: Delete a post by id
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Post deleted successfully
+ *   put:
+ *     summary: Update a post by id
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: formData
+ *         name: caption
+ *         type: string
+ *         required: true
+ *       - in: formData
+ *         name: image
+ *         type: file
+ *         required: false
+ *     responses:
+ *       200:
+ *         description: Post updated successfully
+ */
 
 // post----------------------------------------------------------------------------------
 

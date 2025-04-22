@@ -8,6 +8,8 @@ const Notifications = ({ currentUser = { username: "" } }) => {
   const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [profileMap, setProfileMap] = useState({});
+  const [postImageMap, setPostImageMap] = useState({});
 
   useEffect(() => {
     if (!currentUser || !currentUser.username) return;
@@ -15,7 +17,6 @@ const Notifications = ({ currentUser = { username: "" } }) => {
       try {
         const response = await fetch(`http://localhost:5000/api/notifications/${currentUser.username}`);
         const data = await response.json();
-        // เพิ่ม isRead = false ให้ทุกอัน (ถ้า backend ยังไม่มี)
         setNotifications(data.map(n => ({ ...n, isRead: false })));
       } catch (error) {
         console.error("Error fetching notifications:", error);
@@ -25,6 +26,54 @@ const Notifications = ({ currentUser = { username: "" } }) => {
     };
     fetchNotifications();
   }, [currentUser]);
+
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      if (notifications.length === 0) return;
+      const uniqueSenders = [...new Set(notifications.map(n => n.sender).filter(Boolean))];
+      if (uniqueSenders.length === 0) return;
+      try {
+        const response = await fetch("http://localhost:5000/api/profiles");
+        const profiles = await response.json();
+        const map = {};
+        profiles.forEach((p) => {
+          map[p.username] = p.avatar ? `http://localhost:5000${p.avatar}` : "/placeholder.svg";
+        });
+        setProfileMap(map);
+      } catch (error) {
+        // fallback: do nothing
+      }
+    };
+    fetchProfiles();
+  }, [notifications]);
+
+  useEffect(() => {
+    const fetchPostImages = async () => {
+      const postIds = [
+        ...new Set(
+          notifications
+            .filter((n) => n.postId)
+            .map((n) => n.postId)
+        ),
+      ];
+      if (postIds.length === 0) return;
+      try {
+        const response = await fetch("http://localhost:5000/api/posts");
+        const posts = await response.json();
+        const map = {};
+        postIds.forEach((id) => {
+          const post = posts.find((p) => p.id === id);
+          if (post && post.image) {
+            map[id] = `http://localhost:5000${post.image}`;
+          }
+        });
+        setPostImageMap(map);
+      } catch (error) {
+        // fallback: do nothing
+      }
+    };
+    fetchPostImages();
+  }, [notifications]);
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp)
@@ -117,9 +166,7 @@ const Notifications = ({ currentUser = { username: "" } }) => {
               <div className="notification-avatar">
                 <img
                   src={
-                    notification.sender
-                      ? `http://localhost:5000/avatars/${notification.sender}.jpg`
-                      : "/placeholder.svg"
+                    profileMap[notification.sender] || "/placeholder.svg"
                   }
                   alt={notification.sender}
                 />
@@ -141,8 +188,8 @@ const Notifications = ({ currentUser = { username: "" } }) => {
                 <div className="notification-post-image">
                   <img
                     src={
-                      notification.postId
-                        ? `http://localhost:5000/uploads/posts/${notification.postId}.jpg`
+                      notification.postId && postImageMap[notification.postId]
+                        ? postImageMap[notification.postId]
                         : "/placeholder.svg"
                     }
                     alt="Post"
