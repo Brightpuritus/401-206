@@ -30,6 +30,21 @@
 .navbar-logo:hover {
   transform: translateY(-2px);
 }
+.navbar-logo img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+}
+.navbar-logo img {
+  height: 120px; /* ปรับขนาดตามต้องการ */
+  width: auto;
+  object-fit: contain;
+}
 
 .logo {
   height: 36px;

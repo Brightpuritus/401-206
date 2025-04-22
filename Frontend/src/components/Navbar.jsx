@@ -39,7 +39,11 @@ const Navbar = ({ currentUser, setCurrentUser }) => {
       <div className="navbar-container">
         <div className="navbar-logo">
           <Link to="/">
-            <img src="/assets/yamaha-logo.png" alt="Yamaha Social" className="logo" />
+            <img 
+              src="http://localhost:5000/avatars/yamaha.png" 
+              alt="Yamaha Social" 
+              className="logo" 
+            />
           </Link>
         </div>
 
