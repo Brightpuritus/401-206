@@ -32,3 +32,78 @@
     font-size: 14px;
     color: #666;
   }
+
+  .fixed-buttons {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+  }
+
+/* สไตล์สำหรับพื้นหลังมืด */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* พื้นหลังโปร่งแสง */
+  z-index: 999; /* ให้อยู่ด้านบนสุด */
+}
+
+/* สไตล์สำหรับฟอร์ม Popup */
+.post-event-container {
+  position: fixed!important;
+  top: 50%!important;
+  left: 50%!important;
+  transform: translate(-50%, -50%)!important;
+  max-width: 800px!important;
+  width: 90%!important;
+  background: var(--white)!important;
+  padding: 40px!important;
+  border-radius: 20px!important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2)!important;
+  z-index: 1000!important;
+}
+
+/* สไตล์สำหรับปุ่มในฟอร์ม */
+.post-event-form button {
+  padding: 16px!important;
+  background: var(--yamaha-red)!important;
+  color: var(--white)!important;
+  border: none!important;
+  border-radius: 12px!important;
+  font-size: 16px!important;
+  font-weight: 600!important;
+  cursor: pointer!important;
+  transition: all 0.3s ease!important;
+}
+
+.post-event-form button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(227, 24, 55, 0.25) !important
+}
+
+/* ปุ่ม Cancel */
+.post-event-form button[type="button"] {
+  background: #ccc !important;
+  color: #333 !important;
+}
+
+.post-event-form button[type="button"]:hover {
+  background: #bbb !important
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}

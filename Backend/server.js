@@ -1084,22 +1084,29 @@ app.post("/api/events", upload.single("image"), async (req, res) => {
     res.status(500).json({ error: "Failed to create event" });
   }
 });
-
 app.put("/api/events/:id", upload.single("image"), async (req, res) => {
   try {
     const { id } = req.params;
     const { title, description, date, time } = req.body;
+
     let updateSql = "UPDATE events SET title=?, description=?, date=?, time=?";
     let params = [title, description, date, time];
+
     if (req.file) {
       updateSql += ", image=?";
       params.push(`/uploads/${req.file.filename}`);
     }
+
     updateSql += " WHERE id=?";
     params.push(id);
+
     await pool.query(updateSql, params);
+
     const [rows] = await pool.query("SELECT * FROM events WHERE id=?", [id]);
-    if (rows.length === 0) return res.status(404).json({ error: "Event not found" });
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Event not found" });
+    }
+
     res.json({ message: "Event updated successfully", event: rows[0] });
   } catch (error) {
     console.error("Error updating event:", error);

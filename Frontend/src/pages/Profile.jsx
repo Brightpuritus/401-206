@@ -16,6 +16,7 @@ const Profile = ({ currentUser, onUpdateUser }) => {
   const [activeTab, setActiveTab] = useState("posts"); // แท็บที่เลือก
   const [isEditingFullName, setIsEditingFullName] = useState(false);
   const [newFullName, setNewFullName] = useState("");
+  const [newBio, setNewBio] = useState(""); // เพิ่ม state สำหรับ bio
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const fileInputRef = useRef(null);
   const [showFollowersModal, setShowFollowersModal] = useState(false);
@@ -50,6 +51,7 @@ const Profile = ({ currentUser, onUpdateUser }) => {
         const profileData = await profileResponse.json();
         setProfile(profileData);
         setNewFullName(profileData.fullName);
+        setNewBio(profileData.bio); // ตั้งค่า bio
 
         // Fetch followers
         const followersRes = await fetch(`http://localhost:5000/api/profiles/${username}/followers`);
@@ -108,7 +110,7 @@ const Profile = ({ currentUser, onUpdateUser }) => {
     fetchProfiles();
   }, []);
 
-  const handleEditFullName = async () => {
+  const handleEditProfile = async () => {
     try {
       const response = await fetch(`http://localhost:5000/api/profiles/${profile.id}`, {
         method: "PUT",
@@ -117,6 +119,7 @@ const Profile = ({ currentUser, onUpdateUser }) => {
         },
         body: JSON.stringify({
           fullName: newFullName,
+          bio: newBio, // เพิ่ม bio
         }),
       });
 
@@ -128,7 +131,7 @@ const Profile = ({ currentUser, onUpdateUser }) => {
       setProfile(updatedProfile);
       setIsEditingFullName(false);
     } catch (error) {
-      console.error("Error updating fullName:", error);
+      console.error("Error updating profile:", error);
       alert("Failed to update profile. Please try again.");
     }
   };
@@ -461,10 +464,10 @@ const Profile = ({ currentUser, onUpdateUser }) => {
               className="edit-form"
               onSubmit={(e) => {
                 e.preventDefault();
-                handleEditFullName();
+                handleEditProfile();
               }}
             >
-              <h3>Edit Full Name</h3>
+              <h3>Edit Profile</h3>
               <input
                 type="text"
                 className="edit-input"
@@ -473,6 +476,13 @@ const Profile = ({ currentUser, onUpdateUser }) => {
                 placeholder="Full Name"
                 minLength={2}
                 required
+              />
+              <textarea
+                className="edit-input"
+                value={newBio}
+                onChange={(e) => setNewBio(e.target.value)}
+                placeholder="Bio"
+                rows="3"
               />
               <div className="edit-buttons">
                 <button type="button" className="cancel-btn" onClick={() => setIsEditingFullName(false)}>

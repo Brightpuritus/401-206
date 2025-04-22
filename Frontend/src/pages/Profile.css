@@ -60,11 +60,11 @@
 
 .edit-input {
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #dbdbdb;
-  border-radius: 4px;
+  padding: 10px;
+  border: 2px solid var(--gray-200);
+  border-radius: 8px;
   font-size: 14px;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .edit-input:focus {
@@ -74,33 +74,40 @@
 
 .edit-buttons {
   display: flex;
-  justify-content: flex-end;
-  gap: 8px;
+  gap: 10px;
 }
 
 .save-btn,
 .cancel-btn {
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 8px;
   font-weight: 500;
   cursor: pointer;
 }
 
 .save-btn {
-  background: #e31837;
+  background-color: var(--yamaha-red);
   color: white;
   border: none;
 }
 
 .save-btn:disabled {
-  background: #ffd1d1;
+  background-color: #ccc;
   cursor: not-allowed;
 }
 
+.save-btn:hover:not(:disabled) {
+  background-color: #b71c1c;
+}
+
 .cancel-btn {
-  background: white;
-  border: 1px solid #dbdbdb;
-  color: #262626;
+  background-color: #ccc;
+  color: #333;
+  border: none;
+}
+
+.cancel-btn:hover {
+  background-color: #bbb;
 }
 
 .profile-container {

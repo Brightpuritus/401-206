@@ -49,10 +49,17 @@ const AllEvents = ({ currentUser }) => {
   };
 
   const handleEdit = (event) => {
-    setEditingEvent(event); // ตั้งค่าอีเว้นท์ที่ต้องการแก้ไข
+    setEditingEvent({
+      id: event.id,
+      title: event.title,
+      description: event.description,
+      date: new Date(event.date).toISOString().split("T")[0],
+      time: event.time,
+      imageFile: null, // ตั้งค่าเริ่มต้นเป็น null เพราะยังไม่ได้เลือกไฟล์ใหม่
+    });
   };
 
-  const handleSaveEdit = async (updatedEvent) => {
+  const handleSaveEdit = async () => {
     try {
       const formData = new FormData();
       formData.append("title", editingEvent.title);
@@ -70,16 +77,19 @@ const AllEvents = ({ currentUser }) => {
         throw new Error("Failed to update event");
       }
 
+      const updatedEvent = await response.json();
+
       const updatedEvents = events.map((event) =>
-        event.id === updatedEvent.id ? updatedEvent : event
+        event.id === updatedEvent.event.id ? updatedEvent.event : event
       );
       setEvents(updatedEvents);
-      setEditingEvent(null); // ปิดฟอร์มแก้ไข
+      setEditingEvent(null);
       console.log("Event updated successfully");
     } catch (error) {
       console.error("Error updating event:", error);
     }
   };
+
   return (
     <div className="all-events-container">
       <h1>All Events</h1>
@@ -131,56 +141,70 @@ const AllEvents = ({ currentUser }) => {
           <p>No events available</p>
         )}
       </div>
+      
       {editingEvent && (
-        <div className="edit-event-form">
-          <h2>Edit Event</h2>
+        <>
+        <div className="popup-overlay" onClick={() => setEditingEvent(null)}></div>
+        <div className="post-event-container">
+          <h1>Edit Event</h1>
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              handleSaveEdit(editingEvent);
+              handleSaveEdit();
             }}
+            className="post-event-form"
           >
             <input
               type="text"
-              value={editingEvent.title}
+              name="title"
+              placeholder="Event Title"
+              value={editingEvent.title || ""}
               onChange={(e) =>
                 setEditingEvent({ ...editingEvent, title: e.target.value })
               }
-              placeholder="Title"
+              required
             />
             <textarea
-              value={editingEvent.description}
+              name="description"
+              placeholder="Event Description"
+              value={editingEvent.description || ""}
               onChange={(e) =>
                 setEditingEvent({ ...editingEvent, description: e.target.value })
               }
-              placeholder="Description"
+              required
             />
             <input
               type="date"
-              value={editingEvent.date}
+              name="date"
+              value={editingEvent.date || ""}
               onChange={(e) =>
                 setEditingEvent({ ...editingEvent, date: e.target.value })
               }
+              min={new Date().toISOString().split("T")[0]}
+              required
             />
             <input
               type="time"
-              value={editingEvent.time}
+              name="time"
+              value={editingEvent.time || ""}
               onChange={(e) =>
                 setEditingEvent({ ...editingEvent, time: e.target.value })
               }
+              required
             />
             <input
               type="file"
-              onChange={(e) =>
-                setEditingEvent({ ...editingEvent, imageFile: e.target.files[0] })
-              }
+              name="image"
+              accept="image/*"
+              onChange={(e) => setEditingEvent({ ...editingEvent, imageFile: e.target.files[0] })}
             />
-            <button type="submit">Save</button>
+            <button type="submit">Save Changes</button>
             <button type="button" onClick={() => setEditingEvent(null)}>
               Cancel
             </button>
           </form>
         </div>
+      </>
       )}
     </div>
   );
