@@ -7,7 +7,6 @@ import "./Navbar.css"
 const Navbar = ({ currentUser, setCurrentUser }) => {
   const [searchQuery, setSearchQuery] = useState("")
   const [showSettings, setShowSettings] = useState(false)
-  const [isDarkTheme, setIsDarkTheme] = useState(false)
   const navigate = useNavigate()
 
   const handleSearch = (e) => {
@@ -27,11 +26,6 @@ const Navbar = ({ currentUser, setCurrentUser }) => {
     localStorage.removeItem('user')
     setCurrentUser(null)
     navigate('/login')
-  }
-
-  const toggleTheme = () => {
-    setIsDarkTheme(!isDarkTheme)
-    document.body.classList.toggle('dark-theme')
   }
 
   return (
@@ -81,10 +75,13 @@ const Navbar = ({ currentUser, setCurrentUser }) => {
             </button>
             <div className={`settings-dropdown ${showSettings ? 'active' : ''}`}>
               <Link to={`/profile/${currentUser.username}`}>Profile</Link>
-              <Link to="/settings">Settings</Link>
-              <button onClick={toggleTheme}>
-                {isDarkTheme ? 'Light Theme' : 'Dark Theme'}
-              </button>
+              <a 
+                href="https://www.yamaha-motor.co.th/home" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                Yamaha Website
+              </a>
               <button onClick={handleLogout}>Logout</button>
             </div>
           </div>
