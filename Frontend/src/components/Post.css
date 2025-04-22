@@ -391,6 +391,23 @@
   color: var(--gray-600);
 }
 
+.close-modal-btn {
+  position: absolute; /* ใช้ absolute เพื่อกำหนดตำแหน่ง */
+  top: 10px; /* ระยะห่างจากด้านบน */
+  right: 10px; /* ระยะห่างจากด้านขวา */
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #333;
+  transition: transform 0.2s ease;
+}
+
+.close-modal-btn:hover {
+  transform: scale(1.2); /* เพิ่มเอฟเฟกต์เมื่อ hover */
+  color: #e31837; /* เปลี่ยนสีเมื่อ hover */
+}
+
 @keyframes modalFadeIn {
   from {
     opacity: 0;
