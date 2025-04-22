@@ -161,6 +161,20 @@
   transform: scale(1.05);
 }
 
+.notification-delete-btn {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  margin-left: 8px;
+  font-size: 1.1em;
+  transition: color 0.2s;
+}
+
+.notification-delete-btn:hover {
+  color: #e74c3c;
+}
+
 .unread-indicator {
   width: 8px;
   height: 8px;

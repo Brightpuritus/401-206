@@ -547,6 +547,23 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 /**
  * @swagger
+ * /api/notifications/{id}:
+ *   delete:
+ *     tags: [Notifications]
+ *     summary: Delete a notification by id
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Notification deleted
+ */
+
+/**
+ * @swagger
  * /api/posts/{id}:
  *   delete:
  *     summary: Delete a post by id
@@ -1037,6 +1054,17 @@ app.get("/api/notifications/:username", async (req, res) => {
     res.json(notifications);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch notifications" });
+  }
+});
+
+// API สำหรับลบ notification
+app.delete("/api/notifications/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query("DELETE FROM notifications WHERE id=?", [id]);
+    res.json({ message: "Notification deleted" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete notification" });
   }
 });
 

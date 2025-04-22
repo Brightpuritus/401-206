@@ -98,9 +98,18 @@ const Notifications = ({ currentUser = { username: "" } }) => {
     )
   }
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map((notification) => ({ ...notification, isRead: true })))
-  }
+  const handleDeleteNotification = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/notifications/${id}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
+      }
+    } catch (error) {
+      // อาจแจ้งเตือน error ได้
+    }
+  };
 
   if (loading) {
     return (
@@ -115,11 +124,6 @@ const Notifications = ({ currentUser = { username: "" } }) => {
     <div className="notifications-container">
       <div className="notifications-header">
         <h2>Notifications</h2>
-        {notifications.some((notification) => !notification.isRead) && (
-          <button className="mark-read-btn" onClick={markAllAsRead}>
-            Mark all as read
-          </button>
-        )}
       </div>
 
       <div className="notifications-tabs">
@@ -128,12 +132,6 @@ const Notifications = ({ currentUser = { username: "" } }) => {
           onClick={() => setActiveTab("all")}
         >
           All
-        </button>
-        <button
-          className={`notification-tab ${activeTab === "unread" ? "active" : ""}`}
-          onClick={() => setActiveTab("unread")}
-        >
-          Unread
         </button>
         <button
           className={`notification-tab ${activeTab === "like" ? "active" : ""}`}
@@ -160,8 +158,7 @@ const Notifications = ({ currentUser = { username: "" } }) => {
           filteredNotifications.map((notification) => (
             <div
               key={notification.id}
-              className={`notification-item ${!notification.isRead ? "unread" : ""}`}
-              onClick={() => markAsRead(notification.id)}
+              className="notification-item"
             >
               <div className="notification-avatar">
                 <img
@@ -196,7 +193,16 @@ const Notifications = ({ currentUser = { username: "" } }) => {
                   />
                 </div>
               ) : null}
-              {!notification.isRead && <div className="unread-indicator"></div>}
+              <button
+                className="notification-delete-btn"
+                onClick={e => {
+                  e.stopPropagation();
+                  handleDeleteNotification(notification.id);
+                }}
+                title="Delete notification"
+              >
+                <i className="fa fa-trash"></i>
+              </button>
             </div>
           ))
         ) : (
