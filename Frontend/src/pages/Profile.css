@@ -386,9 +386,9 @@
   }
 
   .profile-follow-btn {
-    margin-left: 0; /* Reset margin for mobile */
-    width: 100%; /* Full width on mobile */
-    max-width: 200px; /* Limit maximum width */
+    margin-left: 0!important; /* Reset margin for mobile */
+    width: 100%!important; /* Full width on mobile */
+    max-width: 200px!important; /* Limit maximum width */
   }
 }
 
@@ -594,8 +594,8 @@
 }
 
 .profile-follow-btn.unfollow:hover {
-  background-color: var(--yamaha-red-light);
-  transform: translateY(-2px);
+  background-color: var(--yamaha-red-light)!important;
+  transform: translateY(-2px)!important;
 }
 
 /* Add animation for state changes */
@@ -609,11 +609,11 @@
 }
 
 .profile-follow-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.95)!important;
 }
 
 .profile-follow-btn i {
-  font-size: 16px;
+  font-size: 16px!important;
 }
 
 /* Modal overlay */
@@ -629,103 +629,103 @@
 
 /* Modal container */
 .followers-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 1001;
-  width: 300px;
-  max-height: 400px;
-  overflow-y: auto;
+  position: fixed!important;
+  top: 50%!important;
+  left: 50%!important;
+  transform: translate(-50%, -50%)!important;
+  background: white!important;
+  padding: 20px!important;
+  border-radius: 8px!important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1)!important;
+  z-index: 1001!important;
+  width: 300px!important;
+  max-height: 400px!important;
+  overflow-y: auto!important;
 }
 
 /* Modal header */
 .followers-modal h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
-  text-align: center;
+  margin: 0 0 10px!important;
+  font-size: 18px!important;
+  text-align: center!important;
 }
 
 /* Followers list */
 .followers-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  list-style: none!important;
+  padding: 0!important;
+  margin: 0!important;
 }
 
 .follower-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
+  display: flex!important;
+  align-items: center!important;
+  margin-bottom: 10px!important;
 }
 
 .follower-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 10px;
+  width: 40px!important;
+  height: 40px!important;
+  border-radius: 50%!important;
+  margin-right: 10px!important;
 }
 
-.close-modal-btn {
-  display: block;
-  margin: 10px auto 0;
-  padding: 8px 16px;
-  background: #0095f6;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.close-modal-btn-kk {
+  display: block!important;
+  margin: 10px auto 0!important;
+  padding: 8px 16px!important;
+  background: #0095f6!important;
+  color: white!important;
+  border: none!important;
+  border-radius: 4px!important;
+  cursor: pointer!important;
 }
 
-.close-modal-btn:hover {
-  background: #007bb5;
+.close-modal-btn-kk:hover {
+  background: #007bb5!important;
 }
 
 /* Modal container for Following */
 .following-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 1001;
-  width: 300px;
-  max-height: 400px;
-  overflow-y: auto;
+  position: fixed!important;
+  top: 50%!important;
+  left: 50%!important;
+  transform: translate(-50%, -50%)!important;
+  background: white!important;
+  padding: 20px!important;
+  border-radius: 8px!important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1)!important;
+  z-index: 1001!important;
+  width: 300px!important;
+  max-height: 400px!important;
+  overflow-y: auto!important;
 }
 
 /* Modal header */
 .following-modal h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
-  text-align: center;
+  margin: 0 0 10px!important;
+  font-size: 18px!important;
+  text-align: center!important;
 }
 
 /* Following list */
 .following-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  list-style: none!important;
+  padding: 0!important;
+  margin: 0!important;
 }
 
 .following-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
+  display: flex!important;
+  align-items: center!important;
+  margin-bottom: 10px!important;
 }
 
 .following-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 10px;
+  width: 40px!important;
+  height: 40px!important;
+  border-radius: 50%!important;
+  margin-right: 10px!important;
 }
 
 .post-modal {
@@ -1007,7 +1007,7 @@
   font-size: 16px;
 }
 
-.close-modal-btn {
+.close-modal-btn-kk {
   background: none;
   border: none;
   color: var(--gray-600);
@@ -1017,8 +1017,7 @@
   transition: all 0.2s ease;
 }
 
-.close-modal-btn:hover {
+.close-modal-btn-kk:hover {
   background-color: var(--yamaha-red-light);
   color: var(--yamaha-red);
-  transform: rotate(90deg);
 }

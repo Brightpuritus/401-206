@@ -380,7 +380,7 @@ const Profile = ({ currentUser, onUpdateUser }) => {
 
         <div className="profile-info">
           <div className="profile-top">
-            <h2 className="profile-username">{profile.username}</h2>
+            <h2 className="profile-fullname">{profile.fullName}</h2>
 
             {isOwnProfile ? (
               <button className="profile-edit-btn" onClick={() => setIsEditingFullName(true)}>
@@ -415,7 +415,7 @@ const Profile = ({ currentUser, onUpdateUser }) => {
                     </li>
                   ))}
                 </ul>
-                <button className="close-modal-btn" onClick={handleCloseFollowingModal}>
+                <button className="close-modal-btn-kk" onClick={handleCloseFollowingModal}>
                   Close
                 </button>
               </div>
@@ -433,7 +433,7 @@ const Profile = ({ currentUser, onUpdateUser }) => {
                     </li>
                   ))}
                 </ul>
-                <button className="close-modal-btn" onClick={handleCloseFollowersModal}>
+                <button className="close-modal-btn-kk" onClick={handleCloseFollowersModal}>
                   Close
                 </button>
               </div>
@@ -590,7 +590,7 @@ const Profile = ({ currentUser, onUpdateUser }) => {
                     />
                     <span>{profile.username}</span>
                   </Link>
-                  <button className="close-modal-btn" onClick={handleClosePostModal}>
+                  <button className="close-modal-btn-kk" onClick={handleClosePostModal}>
                     <i className="fas fa-times"></i>
                   </button>
                 </div>

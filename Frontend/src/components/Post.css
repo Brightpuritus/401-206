@@ -391,7 +391,7 @@
   color: var(--gray-600);
 }
 
-.close-modal-btn {
+.close-modal-btn-pp {
   position: absolute; /* ใช้ absolute เพื่อกำหนดตำแหน่ง */
   top: 10px; /* ระยะห่างจากด้านบน */
   right: 10px; /* ระยะห่างจากด้านขวา */
@@ -403,7 +403,7 @@
   transition: transform 0.2s ease;
 }
 
-.close-modal-btn:hover {
+.close-modal-btn-pp:hover {
   transform: scale(1.2); /* เพิ่มเอฟเฟกต์เมื่อ hover */
   color: #e31837; /* เปลี่ยนสีเมื่อ hover */
 }

@@ -136,9 +136,9 @@ const CreatePost = ({ currentUser }) => {
                       ? `http://localhost:5000${currentUser.avatar}`
                       : "http://localhost:5000/avatars/placeholder-person.jpg"
                     } 
-                    alt={currentUser.username}
+                    alt={currentUser.fullname || currentUser.username}
                   />
-                  <span>{currentUser.username}</span>
+                  <span>{currentUser.fullname ? currentUser.fullname : currentUser.username}</span>
                 </div>
                 <textarea
                   placeholder="Write a caption..."
@@ -158,15 +158,7 @@ const CreatePost = ({ currentUser }) => {
                   </div>
                   <div className="post-option">
                     <div className="toggle-container">
-                      <span>Turn off commenting</span>
-                      <label className="toggle-switch">
-                        <input 
-                          type="checkbox"
-                          checked={disableComments}
-                          onChange={(e) => setDisableComments(e.target.checked)}
-                        />
-                        <span className="toggle-slider"></span>
-                      </label>
+                      
                     </div>
                   </div>
                 </div>

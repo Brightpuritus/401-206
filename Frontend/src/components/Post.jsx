@@ -150,31 +150,33 @@ const Post = ({ post, currentUser }) => {
 
   return (
     <div className="post card">
-      <div className="post-header">
-        <Link to={`/profile/${post.username}`} className="post-user">
-          <img
-            src={postUserProfile?.avatar ? `http://localhost:5000${postUserProfile.avatar}` : "/placeholder.svg"}
-            alt={post.username}
-            className="post-avatar"
-          />
-          <span className="post-username">{post.username}</span>
-        </Link>
-        <div className="post-more-container">
-          <button className="post-more" onClick={toggleMenu}>
-            <i className="fa-solid fa-ellipsis"></i>
-          </button>
-          {showMenu && (
-            <div className="post-more-menu">
-              {post.username === currentUser.username && (
-                <>
+    <div className="post-header">
+      <Link to={`/profile/${post.name}`} className="post-user">
+        <img
+          src={postUserProfile?.avatar ? `http://localhost:5000${postUserProfile.avatar}` : "/placeholder.svg"}
+          alt={post.username}
+          className="post-avatar"
+        />
+        <span className="post-fullname">{postUserProfile?.fullName || post.username}</span>
+      </Link>
+      <div className="post-more-container">
+        <button className="post-more" onClick={toggleMenu}>
+          <i className="fa-solid fa-ellipsis"></i>
+        </button>
+        {showMenu && (
+          <div className="post-more-menu">
+            {(post.username === currentUser.username || currentUser.username === "admin") && (
+              <>
+                {post.username === currentUser.username && (
                   <button onClick={() => setIsEditing(true)}>Edit Post</button>
-                  <button onClick={handleDelete}>Delete Post</button>
-                </>
-              )}
-            </div>
-          )}
-        </div>
+                )}
+                <button onClick={handleDelete}>Delete Post</button>
+              </>
+            )}
+          </div>
+        )}
       </div>
+    </div>
 
       <div className="post-image">
         <img
@@ -224,10 +226,8 @@ const Post = ({ post, currentUser }) => {
           </div>
         ) : (
           <>
-            <Link to={`/profile/${post.username}`} className="post-username">
-              {post.username}
-            </Link>{" "}
-            {post.caption}
+            <span className="post-fullname">{postUserProfile?.fullName || post.username}</span>
+             : {post.caption}
           </>
         )}
       </div>
@@ -280,7 +280,7 @@ const Post = ({ post, currentUser }) => {
                     />
                     <span>{selectedPost.username}</span>
                   </Link>
-                  <button className="close-modal-btn" onClick={handleClosePostModal}>
+                  <button className="close-modal-btn-pp" onClick={handleClosePostModal}>
                     <i className="fas fa-times"></i>
                   </button>
                 </div>

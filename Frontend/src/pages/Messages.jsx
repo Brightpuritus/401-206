@@ -26,11 +26,39 @@ const Messages = ({ currentUser }) => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+        // ดึง following
+        let followingUsernames = [];
+        if (!currentUser.following) {
+          const res = await fetch(`http://localhost:5000/api/profiles/${currentUser.username}/following`);
+          if (res.ok) {
+            followingUsernames = await res.json();
+          }
+        } else {
+          followingUsernames = Array.isArray(currentUser.following)
+            ? currentUser.following.map(f => typeof f === "string" ? f : f.username)
+            : [];
+        }
+
+        // ดึง followers
+        let followersUsernames = [];
+        const resFollowers = await fetch(`http://localhost:5000/api/profiles/${currentUser.username}/followers`);
+        if (resFollowers.ok) {
+          followersUsernames = await resFollowers.json();
+        }
+
+        // รวมและลบซ้ำ
+        const allUsernames = Array.from(new Set([
+          ...followingUsernames,
+          ...followersUsernames
+        ]));
+
         const response = await fetch("http://localhost:5000/api/profiles");
         if (response.ok) {
           const data = await response.json();
           const filteredProfiles = data.filter(
-            (profile) => profile.username !== currentUser.username
+            (profile) =>
+              profile.username !== currentUser.username &&
+              allUsernames.includes(profile.username)
           );
           const conversationsWithMessages = await Promise.all(
             filteredProfiles.map(async (profile) => {
@@ -63,7 +91,7 @@ const Messages = ({ currentUser }) => {
       }
     };
     fetchUsers();
-  }, [currentUser.username]);
+  }, [currentUser.username, currentUser.following]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -182,7 +210,7 @@ const Messages = ({ currentUser }) => {
               onClick={() => {
                 setActiveConversation({
                   ...conversation,
-                  messages: [], // ล้างข้อความก่อน
+                  messages: [],
                 });
                 fetchMessages(conversation.user.username);
               }}
